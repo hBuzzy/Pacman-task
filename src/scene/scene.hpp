@@ -37,9 +37,9 @@ public slots:
         update();
     }
     bool StartGame() {
-        const auto itms = items();
+        const auto objects = items();
         if (std::ranges::count_if(
-            itms, SceneObject::TypeEquals(SceneObject::kWall)
+            objects, SceneObject::TypeEquals(SceneObject::kWall)
         ) < minWallsAndCoins_) {
             QMessageBox::critical(
                 (QWidget*)this->parent(), "Wrong game conditions",
@@ -48,7 +48,7 @@ public slots:
             return false;
         }
         if (std::ranges::count_if(
-            itms, SceneObject::TypeEquals(SceneObject::kCoin)
+            objects, SceneObject::TypeEquals(SceneObject::kCoin)
         ) < minWallsAndCoins_) {
             QMessageBox::critical(
                 (QWidget*)this->parent(), "Wrong game conditions",
@@ -57,7 +57,7 @@ public slots:
             return false;
         }
         if (std::ranges::count_if(
-            itms, SceneObject::TypeEquals(SceneObject::kPacman)
+            objects, SceneObject::TypeEquals(SceneObject::kPacman)
         ) < 1) {
             QMessageBox::critical(
                 (QWidget*)this->parent(), "Wrong game conditions",
@@ -65,10 +65,10 @@ public slots:
             );
             return false;
         }
-        for (auto&& item : itms) {
-            std::forward<decltype(item)>(item)->setFlag(
+        for (auto&& object : objects) {
+            std::forward<decltype(object)>(object)->setFlag(
                 QAbstractGraphicsShapeItem::ItemIsMovable, false);
-            std::forward<decltype(item)>(item)->setFlag(
+            std::forward<decltype(object)>(object)->setFlag(
                 QAbstractGraphicsShapeItem::ItemIsSelectable, false);
         }
         timer_.start(100);
@@ -78,9 +78,9 @@ public slots:
         if (Coin* coin = getPacman()->Move(); coin != nullptr) {
             removeItem(coin);
             emit ScoreUpdated(++score_);
-            if (auto itms = items(); std::ranges::find_if(
-                itms, SceneObject::TypeEquals(SceneObject::kCoin)
-            ) == itms.end()) {
+            if (auto objects = items(); std::ranges::find_if(
+                objects, SceneObject::TypeEquals(SceneObject::kCoin)
+            ) == objects.end()) {
                 QMessageBox::information(
                     (QWidget*)this->parent(), "You win",
                     "Congratulations, you have collected all coins!"
@@ -102,11 +102,11 @@ public slots:
     }
 private:
     [[nodiscard]] Pacman* getPacman() const noexcept {
-        auto itms = items();
+        auto objects = items();
         if (auto pacman = std::ranges::find_if(
-            itms.begin(), itms.end(),
+            objects.begin(), objects.end(),
             SceneObject::TypeEquals(SceneObject::kPacman)
-        ); pacman != itms.end())
+        ); pacman != objects.end())
             return dynamic_cast<Pacman*>(*pacman);
         return nullptr;
     }

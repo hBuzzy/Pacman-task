@@ -80,18 +80,18 @@ public:
                 break;
         }
         moveBy(dx, dy);
-        auto collidingItms = collidingItems();
+        auto collidingObjects = collidingItems();
         if (
             !scene()->sceneRect().contains(sceneBoundingRect())
-            || std::ranges::any_of(collidingItms, SceneObject::TypeEquals(kWall))
+            || std::ranges::any_of(collidingObjects, SceneObject::TypeEquals(kWall))
         ) {
             moveBy(-dx, -dy);
             setBrush({collisionColor_});
         } else
             setBrush({normalColor_});
         if (auto coin = std::ranges::find_if(
-            collidingItms, SceneObject::TypeEquals(kCoin)
-        ); coin != collidingItms.end())
+            collidingObjects, SceneObject::TypeEquals(kCoin)
+        ); coin != collidingObjects.end())
             return dynamic_cast<Coin*>(*coin);
         return nullptr;
     }
