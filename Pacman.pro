@@ -9,11 +9,23 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    dragitem.cpp \
+    game.cpp \
+    itemsfactory.cpp \
+    itemswidget.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    scene.cpp \
+    sceneitem.cpp
 
 HEADERS += \
-    mainwindow.h
+    dragitem.h \
+    game.h \
+    itemsfactory.h \
+    itemswidget.h \
+    mainwindow.h \
+    scene.h \
+    sceneitem.h
 
 FORMS += \
     mainwindow.ui
