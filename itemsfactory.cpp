@@ -6,7 +6,7 @@ SceneItem *ItemsFactory::Create(ItemsType type) {
   QPainterPath path;
 
   QPen pen(Qt::black, 1);
-  QBrush brush(GetColorForItemType(type), Qt::SolidPattern);
+  QBrush brush(GetColorByItemType(type), Qt::SolidPattern);
 
   if (type == ItemsType::kWall) {
     path.addRect(0, 0, 100, 20);
@@ -33,7 +33,7 @@ SceneItem *ItemsFactory::Create(ItemsType type) {
   return new SceneItem(path, pen, brush);
 }
 
-QColor ItemsFactory::GetColorForItemType(ItemsType type) {
+QColor ItemsFactory::GetColorByItemType(ItemsType type) {
   switch (type) {
     case ItemsType::kWall:
       return Qt::cyan;

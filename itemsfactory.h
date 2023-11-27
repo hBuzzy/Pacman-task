@@ -19,7 +19,7 @@ class ItemsFactory : public QObject {
 
  public:
   static SceneItem* Create(ItemsType type);
-  static QColor GetColorForItemType(ItemsType type);
+  static QColor GetColorByItemType(ItemsType type);
 };
 
 #endif  // ITEMSFACTORY_H

@@ -27,9 +27,9 @@ class Game : public QWidget {
   void timerEvent(QTimerEvent* event);
 
  private:
-  void GameWon();
+  void HandleGameWon();
   void UpdateScore(int addScore);
-  void DeleteCoin(SceneItem* coin, QList<SceneItem*>& coins);
+  void DeleteCoin(SceneItem* coin);
   bool HasCollision();
   bool IsOutOfBounds(int newX, int newY);
 

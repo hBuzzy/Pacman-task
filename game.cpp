@@ -9,7 +9,7 @@
 Game::Game(Scene &scene, QWidget *parent) : QWidget(parent), scene_(scene) {
   collisionColor_ = Qt::red;
   originColor_ =
-      ItemsFactory::GetColorForItemType(ItemsFactory::ItemsType::kPlayer);
+      ItemsFactory::GetColorByItemType(ItemsFactory::ItemsType::kPlayer);
 }
 
 void Game::StartNewGame() {
@@ -23,7 +23,8 @@ void Game::StartNewGame() {
 
   MainWindow *mainWindow = qobject_cast<MainWindow *>(parent());
 
-  QList<SceneItem *> &coins = scene_.GetCoins();
+  const QList<SceneItem *> &coins = scene_.GetCoins();
+
   if (coins.isEmpty()) {
     if (mainWindow) {
       QMessageBox::critical(this, "Ошибка!",
@@ -107,8 +108,8 @@ bool Game::IsOutOfBounds(int newX, int newY) {
 }
 
 bool Game::HasCollision() {
-  QList<SceneItem *> &walls = scene_.GetWalls();
-  QList<SceneItem *> &coins = scene_.GetCoins();
+  const QList<SceneItem *> &walls = scene_.GetWalls();
+  const QList<SceneItem *> &coins = scene_.GetCoins();
 
   for (SceneItem *wall : walls) {
     if (player_->collidesWithItem(wall)) {
@@ -118,7 +119,7 @@ bool Game::HasCollision() {
 
   for (SceneItem *coin : coins) {
     if (player_->collidesWithItem(coin)) {
-      DeleteCoin(coin, coins);
+      DeleteCoin(coin);
     }
   }
 
@@ -126,16 +127,14 @@ bool Game::HasCollision() {
   return false;
 }
 
-void Game::DeleteCoin(SceneItem *coin, QList<SceneItem *> &coins) {
-  scene_.removeItem(coin);
-  coins.removeOne(coin);
-  delete coin;
+void Game::DeleteCoin(SceneItem *coin) {
+  if (scene_.DeleteCoin(coin)) {
+    int score = 1;
+    UpdateScore(score);
 
-  int score = 1;
-  UpdateScore(score);
-
-  if (coins.isEmpty()) {
-    HandleGameWon();
-    StopGame();
+    if (scene_.GetCoins().isEmpty()) {
+      HandleGameWon();
+      StopGame();
+    }
   }
 }

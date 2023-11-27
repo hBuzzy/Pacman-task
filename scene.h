@@ -9,11 +9,12 @@ class Scene : public QGraphicsScene {
  public:
   explicit Scene(QObject *parent = nullptr);
 
-  QList<SceneItem *> &GetWalls();
-  QList<SceneItem *> &GetCoins();
+  const QList<SceneItem *> &GetWalls() const;
+  const QList<SceneItem *> &GetCoins() const;
   SceneItem *GetPlayer() const;
 
   void SetFiguresInteraction(bool enable);
+  bool DeleteCoin(SceneItem *coin);
 
  public slots:
   void RotateSelectedItems();

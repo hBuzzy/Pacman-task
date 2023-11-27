@@ -15,10 +15,8 @@
 
 Scene::Scene(QObject *parent) : QGraphicsScene{parent} { player_ = nullptr; }
 
-QList<SceneItem *> &Scene::GetWalls() { return walls_; }
-
-QList<SceneItem *> &Scene::GetCoins() { return coins_; }
-
+const QList<SceneItem *> &Scene::GetWalls() const { return walls_; }
+const QList<SceneItem *> &Scene::GetCoins() const { return coins_; }
 SceneItem *Scene::GetPlayer() const { return player_; }
 
 void Scene::RotateSelectedItems() {
@@ -142,4 +140,14 @@ void Scene::SetFiguresInteraction(bool enable) {
     item->setFlag(QGraphicsItem::ItemIsSelectable, enable);
     item->setFlag(QGraphicsItem::ItemIsFocusable, enable);
   }
+}
+
+bool Scene::DeleteCoin(SceneItem *coin) {
+  if (!coins_.contains(coin)) {
+    return false;
+  }
+  removeItem(coin);
+  coins_.removeOne(coin);
+  delete coin;
+  return true;
 }
