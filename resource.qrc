@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/resource">
+        <file>puckman.png</file>
+    </qresource>
+</RCC>
