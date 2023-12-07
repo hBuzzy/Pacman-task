@@ -2,9 +2,12 @@
 #define MAINWINDOW_H
 
 #include "player.h"
+#include "hostile.h"
 
-#include <QTableWidgetItem>
+#include <QGraphicsScene>
+#include <QGraphicsView>
 #include <QMainWindow>
+#include <QTimer>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -25,15 +28,27 @@ protected:
 
 private:
     Ui::MainWindow *ui;
-    QTableWidget* tableWidget_;
-    const int rows_ = 5;
-    const int cols_ = 5;
+    QTimer* gameTimer_;
+    float gameTime_;
+    const int rows_ = 10;
+    const int cols_ = 10;
     int **gameGrid_;
+    int gridSize_ = 64;
+    bool isKeyTime_ = true;
     Player player_;
+    std::vector<Hostile> hostiles_;
     void movePlayerUp();
     void movePlayerDown();
     void movePlayerLeft();
     void movePlayerRight();
+    void moveHostile();
+    QGraphicsScene *scene;
+    QGraphicsView *view;
+    void generateRandomElements(int element, int count);
+
+private slots:
+    void updateGameTime();
+    void handleKeyRepeat();
 
 };
 

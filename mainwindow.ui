@@ -16,10 +16,6 @@
     <widget class="QWidget" name="centralwidget">
         <layout class="QVBoxLayout" name="verticalLayout">
             <item>
-                <widget class="QTableWidget" name="tableWidget">
-                    <column>5</column>
-                    <row>5</row>
-                </widget>
             </item>
         </layout>
     </widget>

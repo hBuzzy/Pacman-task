@@ -1,32 +1,47 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include "hostile.h"
+
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <QGraphicsSimpleTextItem>
 #include <QDebug>
 #include <QKeyEvent>
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent), ui(new Ui::MainWindow) {
+
     ui->setupUi(this);
     setFocusPolicy(Qt::StrongFocus);
 
-    tableWidget_ = ui->tableWidget;
+    scene = new QGraphicsScene(this);
+    view = new QGraphicsView(scene, this);
 
-    tableWidget_->setRowCount(rows_);
-    tableWidget_->setColumnCount(cols_);
+    int uiWidth = (cols_+1) * gridSize_;
+    int uiHeight = (rows_+1) * gridSize_;
 
-    tableWidget_->verticalHeader()->setDefaultSectionSize(32);
-    tableWidget_->horizontalHeader()->setDefaultSectionSize(32);
+    this->setFixedSize(uiWidth, uiHeight);
+    setCentralWidget(view);
 
-    tableWidget_->verticalHeader()->setVisible(false);
-    tableWidget_->horizontalHeader()->setVisible(false);
+    gameTimer_ = new QTimer(this);
+    gameTimer_->start(250);
+    connect(gameTimer_, SIGNAL(timeout()), this, SLOT(updateGameTime()));
 
-    tableWidget_->setVisible(true);
-
-    // Выделите память для gameGrid
     gameGrid_ = new int*[rows_];
     for (int i = 0; i < rows_; ++i) {
         gameGrid_[i] = new int[cols_];
     }
+
     generateRandomGameGrid();
+    setupGameGrid();
+}
+
+void MainWindow::updateGameTime() {
+    gameTime_ += 0.5;
+    isKeyTime_ = true;
+    moveHostile();
     setupGameGrid();
 }
 
@@ -43,28 +58,13 @@ void MainWindow::generateRandomGameGrid() {
     // Сбросим генератор случайных чисел
     std::srand(std::time(0));
 
-    // Количество единиц в gameGrid
-    int onesCount = std::rand() % ((rows_ * cols_) / 5) + 1;
+
 
     // Создадим пустую gameGrid
     for (int i = 0; i < rows_; ++i) {
         for (int j = 0; j < cols_; ++j) {
             gameGrid_[i][j] = 0;
         }
-    }
-
-    // Расставим единицы случайным образом
-    for (int k = 0; k < onesCount; ++k) {
-        int randomRow = std::rand() % rows_;
-        int randomCol = std::rand() % cols_;
-
-        // Проверим, что выбранная ячейка еще не содержит 1
-        while (gameGrid_[randomRow][randomCol] == 1) {
-        randomRow = std::rand() % rows_;
-        randomCol = std::rand() % cols_;
-        }
-
-        gameGrid_[randomRow][randomCol] = 1;
     }
 
     // Расставим одну двойку
@@ -75,81 +75,191 @@ void MainWindow::generateRandomGameGrid() {
     player_.setX(randomCol);
     player_.setY(randomRow);
     qDebug() << "Player Coordinates: (" << player_.getX() << ", " << player_.getY() << ")";
+
+    int element = 1;
+    int count = 5;
+    generateRandomElements(element,count);
+
+    element = 3;
+    count = 2;
+    generateRandomElements(element,count);
+
+}
+
+void MainWindow::generateRandomElements(int element, int count) {
+    Hostile newHostile;
+    Point p(0,0);
+    if(element == 3){
+        std::vector<std::vector<int>> matrix;
+            for (int i = 0; i < rows_; ++i) {
+                std::vector<int> row;
+                for (int j = 0; j < cols_; ++j) {
+                    row.push_back(gameGrid_[i][j]);
+                }
+                matrix.push_back(row);
+            }
+
+            // Вывод матрицы
+            for (const auto& row : matrix) {
+                for (const auto& element : row) {
+                    std::cout << element << " ";
+                }
+                std::cout << std::endl;
+            }
+            newHostile.setMatrix(matrix);
+    }
+    for (int k = 0; k < count; ++k) {
+        int randomRow = std::rand() % rows_;
+        int randomCol = std::rand() % cols_;
+        // Проверим, что выбранная ячейка еще не содержит 1
+        while (gameGrid_[randomRow][randomCol] != 0) {
+        randomRow = std::rand() % rows_;
+        randomCol = std::rand() % cols_;
+        }
+        if(element == 3)
+        {
+            p.x = randomCol;
+            p.y = randomRow;
+            newHostile.setPosition(p);
+            hostiles_.push_back(newHostile);
+        }
+        gameGrid_[randomRow][randomCol] = element;
+    }
 }
 
 void MainWindow::setupGameGrid() {
-    // Установите размер ячеек
-
-// Заполните ячейки таблицы значениями из игровой сетки
-    for (int i = 0; i < rows_; ++i) {
-        for (int j = 0; j < cols_; ++j) {
-            QTableWidgetItem* item = new QTableWidgetItem;
-            item->setTextAlignment(Qt::AlignCenter);
-            item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
-            tableWidget_->setItem(i, j, item);
-
-            switch (gameGrid_[i][j]) {
-            case 0: // Empty space
-                item->setBackground(QColor(Qt::white));
-                break;
-            case 1: // Wall
-                item->setBackground(QColor(Qt::darkGray));
-                break;
-            case 2: // player
-                item->setIcon(QIcon(":resource/puckman.png").pixmap(QSize(64, 64)));
-                break;
+    // Очистите сцену перед обновлением
+        scene->clear();
+        QGraphicsPixmapItem* puckmanItem;
+        QGraphicsPixmapItem* hostileItem;
+        // Заполните сцену значениями из игровой сетки
+        for (int i = 0; i < rows_; ++i) {
+            for (int j = 0; j < cols_; ++j) {
+                switch (gameGrid_[i][j]) {
+                case 0: // Empty space
+                    scene->addRect(j * gridSize_, i * gridSize_, gridSize_, gridSize_, QPen(Qt::black), QBrush(Qt::white));
+                    break;
+                case 1: // Wall
+                    scene->addRect(j * gridSize_, i * gridSize_, gridSize_, gridSize_, QPen(Qt::black), QBrush(Qt::darkGray));
+                    break;
+                case 2: // player
+                    puckmanItem = scene->addPixmap(QPixmap(":resource/puckman.png").scaled(gridSize_, gridSize_));
+                    puckmanItem->setX(j * gridSize_);
+                    puckmanItem->setY(i * gridSize_);
+                    break;
+                case 3: // hostile
+                    hostileItem = scene->addPixmap(QPixmap(":resource/hostile.png").scaled(gridSize_, gridSize_));
+                    hostileItem->setX(j * gridSize_);
+                    hostileItem->setY(i * gridSize_);
+                    break;
+                }
             }
         }
-    }
 
-    QSize tablesize = tableWidget_->sizeHint();
-    this->resize(tablesize);
+        // Установите размер сцены
+        view->setSceneRect(0, 0, cols_ * gridSize_, rows_ * gridSize_);
+
+        // Перерисовать сцену
+        view->update();
+}
+
+void MainWindow::moveHostile()
+{
+    if (hostiles_.empty()) {
+        qDebug() << "No hostiles found.";
+        return;
+    }
+    std::vector<char> direction;
+    Point playerPoint(player_.getX(), player_.getY());
+    Point hostilePosition(0,0);
+
+    for (Hostile& currentHostile : hostiles_) {
+        direction = currentHostile.getPath(playerPoint);
+        if(direction[0] == 'L')
+        {
+            hostilePosition = currentHostile.getPosition();
+            gameGrid_[hostilePosition.y][hostilePosition.x] = currentHostile.temp;
+            currentHostile.temp = gameGrid_[hostilePosition.y][hostilePosition.x-1];
+            hostilePosition.x = hostilePosition.x - 1;
+            gameGrid_[hostilePosition.y][hostilePosition.x] = 3;
+            currentHostile.setPosition(hostilePosition);
+        }
+        if(direction[0] == 'R')
+        {
+            hostilePosition = currentHostile.getPosition();
+            gameGrid_[hostilePosition.y][hostilePosition.x] = currentHostile.temp;
+            currentHostile.temp = gameGrid_[hostilePosition.y][hostilePosition.x+1];
+            hostilePosition.x = hostilePosition.x + 1;
+            gameGrid_[hostilePosition.y][hostilePosition.x] = 3;
+            currentHostile.setPosition(hostilePosition);
+        }
+        if(direction[0] == 'U')
+        {
+            hostilePosition = currentHostile.getPosition();
+            gameGrid_[hostilePosition.y][hostilePosition.x] = currentHostile.temp;
+            currentHostile.temp = gameGrid_[hostilePosition.y-1][hostilePosition.x];
+            hostilePosition.y = hostilePosition.y - 1;
+            gameGrid_[hostilePosition.y][hostilePosition.x] = 3;
+            currentHostile.setPosition(hostilePosition);
+        }
+        if(direction[0] == 'D')
+        {
+            hostilePosition = currentHostile.getPosition();
+            gameGrid_[hostilePosition.y][hostilePosition.x] = currentHostile.temp;
+            currentHostile.temp = gameGrid_[hostilePosition.y+1][hostilePosition.x];
+            hostilePosition.y = hostilePosition.y + 1;
+            gameGrid_[hostilePosition.y][hostilePosition.x] = 3;
+            currentHostile.setPosition(hostilePosition);
+        }
+    }
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {
-    switch (event->key()) {
-        case Qt::Key_W:
-            qDebug() << "Player Coordinates: (" << player_.getX() << ", " << player_.getY() << ")";
-            movePlayerUp();
-            break;
-        case Qt::Key_S:
-            qDebug() << "Player Coordinates: (" << player_.getX() << ", " << player_.getY() << ")";
-            movePlayerDown();
-            break;
-        case Qt::Key_A:
-            movePlayerLeft();
-            break;
-        case Qt::Key_D:
-            movePlayerRight();
-            break;
-        default:
-            QMainWindow::keyPressEvent(event);
-            break;
+    if(isKeyTime_)
+    {
+        switch (event->key()) {
+            case Qt::Key_W:
+                movePlayerUp();
+                isKeyTime_ = false;
+                break;
+            case Qt::Key_S:
+                movePlayerDown();
+                isKeyTime_ = false;
+                break;
+            case Qt::Key_A:
+                movePlayerLeft();
+                isKeyTime_ = false;
+                break;
+            case Qt::Key_D:
+                movePlayerRight();
+                isKeyTime_ = false;
+                break;
+            default:
+                QMainWindow::keyPressEvent(event);
+                break;
+        }
     }
 }
 
 void MainWindow::movePlayerUp() {
-    if(gameGrid_[player_.getY()-1][player_.getX()] != 1)
-    {
-        if (player_.getY() > 0) {
+    if (player_.getY() > 0) {
+        if(gameGrid_[player_.getY()-1][player_.getX()] != 1)
+        {
             gameGrid_[player_.getY()][player_.getX()] = 0;
             gameGrid_[player_.getY()-1][player_.getX()] = 2;
             player_.setY(player_.getY() - 1);
-            setupGameGrid();
             qDebug() << "Player Coordinates: (" << player_.getX() << ", " << player_.getY() << ")";
         }
     }
 }
 
 void MainWindow::movePlayerDown() {
-    int rowCount = tableWidget_->rowCount();
-    if(gameGrid_[player_.getY()+1][player_.getX()] != 1)
-    {
-        if (player_.getY()+1 < rowCount) {
+    if (player_.getY()+1 < rows_) {
+        if(gameGrid_[player_.getY()+1][player_.getX()] != 1)
+        {
             gameGrid_[player_.getY()][player_.getX()] = 0;
-            gameGrid_[player_.getY()-1][player_.getX()] = 2;
-            player_.setY(player_.getY() - 1);
-            setupGameGrid();
+            gameGrid_[player_.getY()+1][player_.getX()] = 2;
+            player_.setY(player_.getY() + 1);
             qDebug() << "Player Coordinates: (" << player_.getX() << ", " << player_.getY() << ")";
         }
     }
@@ -162,21 +272,18 @@ void MainWindow::movePlayerLeft() {
             gameGrid_[player_.getY()][player_.getX()] = 0;
             gameGrid_[player_.getY()][player_.getX()-1] = 2;
             player_.setX(player_.getX() - 1);
-            setupGameGrid();
             qDebug() << "Player Coordinates: (" << player_.getX() << ", " << player_.getY() << ")";
         }
     }
 }
 
 void MainWindow::movePlayerRight() {
-    int columnCount = tableWidget_->columnCount();
-    if(gameGrid_[player_.getY()][player_.getX()+1] != 1)
-    {
-        if (player_.getX() < columnCount) {
+    if (player_.getX()+1 < cols_) {
+        if(gameGrid_[player_.getY()][player_.getX()+1] != 1)
+        {
             gameGrid_[player_.getY()][player_.getX()] = 0;
             gameGrid_[player_.getY()][player_.getX()+1] = 2;
             player_.setX(player_.getX() + 1);
-            setupGameGrid();
             qDebug() << "Player Coordinates: (" << player_.getX() << ", " << player_.getY() << ")";
         }
     }
