@@ -20,7 +20,7 @@ private:
     std::vector<std::vector<int>> matrix_;
 
     bool isValid(int x, int y);
-    Point& position_;
+    Point position_;
 
 public:
     Hostile();
@@ -31,7 +31,6 @@ public:
     void setMatrix(std::vector<std::vector<int>>& inputMatrix);
     Point getPosition();
     int temp = 0;
-
 };
 
 #endif // HOSTILE_H

@@ -2,6 +2,16 @@
 
 using namespace std;
 
+
+
+Hostile::Hostile(std::vector<std::vector<int>>& inputMatrix) : position_(0, 0) {
+
+}
+
+Hostile::Hostile() : position_(0, 0) {
+
+}
+
 struct Node {
     Point point;
     int distance;
@@ -17,7 +27,7 @@ struct Node {
 bool Hostile::isValid(int x, int y) {
     int rows = matrix_.size();
     int cols = matrix_[0].size();
-    return x >= 0 && x < cols && y >= 0 && y < rows && matrix_[y][x] != 1;
+    return x >= 0 && x < cols && y >= 0 && y < rows && matrix_[y][x] != 1 && matrix_[y][x] != 3;
 }
 
 vector<char> getMoveDirections(const Point& start, const Point& end) {

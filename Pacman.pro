@@ -12,15 +12,21 @@ SOURCES += \
     hostile.cpp \
     main.cpp \
     mainwindow.cpp \
-    player.cpp
+    player.cpp \
+    redactor.cpp \
+    startgame.cpp
 
 HEADERS += \
     hostile.h \
     mainwindow.h \
-    player.h
+    player.h \
+    redactor.h \
+    startgame.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    redactor.ui \
+    startgame.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
