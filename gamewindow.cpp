@@ -15,23 +15,9 @@ void GameWindow::paintEvent(QPaintEvent* event) {
     pacman_->paint(&painter, nullptr, nullptr);
 }
 
-void GameWindow::initializeGame() {
-
-}
-
-void GameWindow::drawGameArea(QPainter* painter) {
-
-}
-
 void GameWindow::updateGame() {
     movePacman();
     checkCollision();
     update();
 }
 
-void GameWindow::movePacman() {
-}
-
-void GameWindow::checkCollision() {
-
-}

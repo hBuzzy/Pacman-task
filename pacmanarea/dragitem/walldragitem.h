@@ -6,7 +6,7 @@
 
 class WallDragItem : public AbstractDragItem {
 public:
-    enum WallType { VERTICAL, HORISONTAL };
+    enum kWallType { VERTICAL, HORISONTAL };
 public:
     WallDragItem(qreal x, qreal y, qreal boxSize, WallType type);
 
@@ -14,8 +14,8 @@ public slots:
     void touch();
 
 private:
-    int WIDTH_ = 1;
-    int HEIGHT_ = 3;
+    int width_ = 1;
+    int height_ = 3;
 };
 
 #endif // WALLDRAGITEM_H

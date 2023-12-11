@@ -12,11 +12,8 @@ class GameWindow : public QWidget
     Q_OBJECT
 public:
     explicit GameWindow(QVector<QVector<int>> boxArea, QWidget *parent = nullptr);
-    void initializeGame();
-    void drawGameArea(QPainter* painter);
+protected:
     void updateGame();
-    void movePacman();
-    void checkCollision();
     void paintEvent(QPaintEvent* event);
 
 signals:

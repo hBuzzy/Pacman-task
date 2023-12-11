@@ -23,8 +23,8 @@ public slots:
     virtual void touch() = 0;
 
 protected:
-    int WIDTH_ = 1;
-    int HEIGHT_ = 1;
+    int width_ = 1;
+    int height_ = 1;
 
 private:
     QString name_;

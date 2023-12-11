@@ -22,10 +22,10 @@ signals:
 private:
     QGraphicsScene* scene_;
     DroppableArea* droppableArea_;
-    const int DEMO_BOX_SIZE_ = 20;
-    const int AREA_BOX_COUNT_ = 30;
-    const int ITEMS_FIELD_BOX_HEIGHT_COUNT_ = 5;
-    const int PRINT_ITEM_STEP = 5;
+    const int kDemoBoxSize = 20;
+    const int kAreaBoxCount = 30;
+    const int ItemsFieldBoxHeightCount = 5;
+    const int PrintItemStep = 5;
 
     int score_ = 0;
     std::unique_ptr<QGraphicsTextItem> scoreRect_;

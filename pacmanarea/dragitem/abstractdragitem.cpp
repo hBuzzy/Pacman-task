@@ -28,5 +28,5 @@ QString AbstractDragItem::getName() {
 };
 
 QPair<int, int> AbstractDragItem::getSize() {
-    return QPair<int, int>{ WIDTH_, HEIGHT_ };
+    return QPair<int, int>{ width_, height_ };
 }
