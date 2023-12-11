@@ -11,7 +11,7 @@ PacmanItem::PacmanItem(QPainterPath geometry, QPen pen, QBrush brush)
   setPen(pen);
   setBrush(brush);
 
-  coordinateX_ = 1;
+  coordinateX_ = 7;
   coordinateY_ = 0;
   step_ = 1;
 
@@ -43,7 +43,6 @@ void PacmanItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
   painter->setPen(pen());
   painter->setBrush(brush());
   painter->drawPath(geometry_);
-
   if (isSelected()) {
     painter->setPen(selectedPenBack_);
     DrawBorder(painter);

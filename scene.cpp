@@ -7,6 +7,7 @@
 #include <QGraphicsSceneDragDropEvent>
 #include <QIODevice>
 #include <QTimer>
+#include <QMessageBox>
 
 #include "qmimedata.h"
 #include "dragitem.h"
@@ -85,37 +86,45 @@ void Scene::dragEnterEvent(QGraphicsSceneDragDropEvent *event) {
   }
 }
 
+void Scene::setFiguresDragAndDropOption(bool enable) {
+    for (auto &item : items()) {
+      qDebug() << item;
+      item->setFlag(QGraphicsItem::ItemIsMovable, enable);
+      item->setFlag(QGraphicsItem::ItemIsSelectable, enable);
+      item->setFlag(QGraphicsItem::ItemIsFocusable, enable);
+    }
+}
+
 void Scene::dragMoveEvent(QGraphicsSceneDragDropEvent *event) {
   if (event->mimeData()->hasFormat(DragItem::kMimeFormat)) {
     event->accept();
   }
 }
 
-void Scene::dropEvent(QGraphicsSceneDragDropEvent *event) {
-  if (event->mimeData()->hasFormat(DragItem::kMimeFormat)) {
-    /*
-     *Если формат mime нам подходит, то считываем необходимые данные (тип
-     *фигуры), которые Вносили в DragItem
-     */
-    QByteArray itemData = event->mimeData()->data(DragItem::kMimeFormat);
-    QDataStream dataStream(&itemData, QIODevice::ReadOnly);
+void Scene::createEvent(ItemsFactory::ItemsType itemType) {
+  PacmanItem *item = ItemsFactory::Create(itemType);
 
-    ItemsFactory::ItemsType itemType;
-    // Записываем значение переданного типа из потока.
-    dataStream >> itemType;
+  switch (itemType) {
+    case ItemsFactory::ItemsType::kWall:
+      walls_.append(item);
+      break;
+    case ItemsFactory::ItemsType::kCoin:
+      coins_.append(item);
+      break;
+    case ItemsFactory::ItemsType::kPlayer:
+      if (player_ == nullptr) {
+        player_ = item;
+      } else {
+          QMessageBox::information(nullptr, "Ошибка", "На сцене может быть только один игрок.");
+          return;
+        }
+       break;
 
-    // Создаем объект согласно типу и размещаем его относительно положения мыши
-    // в момент отпускания левой кнопки мыши
-    PacmanItem *item = ItemsFactory::Create(itemType);
-    item->setPos(event->scenePos());
-
-    // Добавляем объект на сцену
-    addItem(item);
-
-    event->acceptProposedAction();
-  } else {
-    event->ignore();
+    default:
+      break;
   }
+
+  addItem(item);
 }
 
 

@@ -24,8 +24,9 @@ class MainWindow : public QMainWindow {
  private slots:
   void UpdateScoreLSD(uint newScore);
   void AddNewItem();
-  void AddNewOwnItem();
+  void AddNewPlayerItem();
   void AddNewCoinItem();
+  void AddNewWallItem();
 
  protected:
   void keyPressEvent(QKeyEvent *event);

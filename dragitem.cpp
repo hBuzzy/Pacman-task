@@ -11,13 +11,10 @@ DragItem::DragItem(ItemsFactory::ItemsType type, QWidget *parent)
   QRect geometry = graphicsItem_->boundingRect().toRect();
   setGeometry(geometry);
 
-  // Задаем размер элемента списка (QListWidgetItem)
-  // Делаем его чуть больше в размере, чтобы элементы списка не слипались
-  int additionalHeight = 2;
+  int additionalHeight = 20;
   setSizeHint(QSize(geometry.width(), geometry.height() + additionalHeight));
 }
 
-// Отрисовываем нашу фигуру в списке
 void DragItem::paintEvent(QPaintEvent *event) {
   Q_UNUSED(event)
 

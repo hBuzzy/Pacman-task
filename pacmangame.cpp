@@ -27,7 +27,7 @@ void PacmanGame::startNewGame() {
   if (coins.isEmpty()) {
     if (mainWindow) {
       QMessageBox::critical(this, "Error", "Необходимо разместить монеты на игровом поле!");
-      mainWindow->SetWidgetMoveEnabled(true);
+      //mainWindow->SetWidgetMoveEnabled(true);
     }
     return;
   }
@@ -35,10 +35,6 @@ void PacmanGame::startNewGame() {
   if (gameTimer_.isActive()) {
     QMessageBox::critical(this, "Error", "Игра стартовала!");
     return;
-  }
-
-  if (mainWindow) {
-    mainWindow->SetWidgetMoveEnabled(false);
   }
 
   score_ = 0;

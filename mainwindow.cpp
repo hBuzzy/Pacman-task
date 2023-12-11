@@ -3,8 +3,11 @@
 #include <qgraphicsitem.h>
 #include <dragitem.h>
 
+#include <QCoreApplication>
+#include <QDebug>
 #include <QGraphicsItem>
 #include <QKeyEvent>
+#include <QMessageBox>
 
 #include "ui_mainwindow.h"
 
@@ -16,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
   SetConnections();
 
   ui_->graphicsView->setFocusPolicy(Qt::StrongFocus);
-  ui_->listWidget->setFocusPolicy(Qt::NoFocus);
+  //ui_->listWidget->setFocusPolicy(Qt::NoFocus);
 }
 
 MainWindow::~MainWindow() { delete ui_; }
@@ -38,16 +41,30 @@ void MainWindow::AddNewItem() {
                    QGraphicsItem::ItemIsSelectable);
 }
 
-void MainWindow::AddNewOwnItem(ItemsFactory::ItemsType itemType) {
-
-}
+//void MainWindow::AddItemToList(ItemsFactory::ItemsType itemType) {
+//  DragItem *item = new DragItem(itemType);
+//  ui_->listWidget->addItem(item);
+//  ui_->listWidget->setItemWidget(item, item);
+//}
 
 void MainWindow::AddNewCoinItem() {
-  scene_->addItem(ItemsFactory::Create(ItemsFactory::ItemsType::kCoin));
+  scene_->createEvent(ItemsFactory::ItemsType::kCoin);
+  qDebug() << scene_->getWalls() << scene_->getCoins() << scene_->getPlayer();
+  // scene_->addItem(ItemsFactory::Create(ItemsFactory::ItemsType::kCoin));
+}
+
+void MainWindow::AddNewWallItem() {
+  scene_->createEvent(ItemsFactory::ItemsType::kWall);
+  // scene_->addItem(ItemsFactory::Create(ItemsFactory::ItemsType::kWall));
+}
+
+void MainWindow::AddNewPlayerItem() {
+  scene_->createEvent(ItemsFactory::ItemsType::kPlayer);
+  // scene_->addItem(ItemsFactory::Create(ItemsFactory::ItemsType::kPlayer));
 }
 
 void MainWindow::UpdateScoreLSD(uint score) {
-  ui_->Score->display(score);
+  //ui_->scoreLCD->display(score);
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {
@@ -56,18 +73,12 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     // Если есть выделенные объекты на сцене, берем первый из них
     if (!selectedItems.isEmpty()) {
       auto item = selectedItems[0];
-
-      // Выводим все столкновения объекта item на сцене с помощью метода сцены
-      qDebug() << "Метод сцены: " << scene_->collidingItems(item)
-               << Qt::endl
-               // Для выбранного объекта выводим все столкновения c помощью
-               // метода объекта
-               << "Метод объекта: " << item->collidingItems();
-
-      // Проверяем сталкивается ли объект item с item2
-      // item->collidesWithItem(item2)
     }
   }
+}
+
+void MainWindow::SetWidgetMoveEnabled(bool enabled) {
+
 }
 
 void MainWindow::SetConnections() {
@@ -78,10 +89,10 @@ void MainWindow::SetConnections() {
             [=]() { scene_->setFiguresDragAndDropOption(false); });
 
   connect(ui_->newItemButon, &QPushButton::clicked, this,
-          &MainWindow::AddNewItem);
+          &MainWindow::AddNewWallItem);
 
-  connect(ui_->newOwnItemButton, &QPushButton::clicked, this,
-          &MainWindow::AddNewOwnItem);
+  connect(ui_->newPlayerButton, &QPushButton::clicked, this,
+          &MainWindow::AddNewPlayerItem);
 
   connect(ui_->newCoinItemButton, &QPushButton::clicked, this,
           &MainWindow::AddNewCoinItem);
@@ -118,14 +129,13 @@ void MainWindow::SetUi() {
   QRectF viewRect = ui_->graphicsView->geometry();
   scene_->setSceneRect(viewRect);
 
-  AddNewOwnItem(ItemsFactory::ItemsType::kWall);
-  AddNewOwnItem(ItemsFactory::ItemsType::kPlayer);
-  AddNewOwnItem(ItemsFactory::ItemsType::kCoin);
+//  AddNewOwnItem(ItemsFactory::ItemsType::kWall);
+//  AddNewOwnItem(ItemsFactory::ItemsType::kPlayer);
+//  AddNewOwnItem(ItemsFactory::ItemsType::kCoin);
 }
 
 void MainWindow::addItemToList(ItemsFactory::ItemsType itemType) {
   DragItem *item = new DragItem(itemType);
-  ui_->listWidget->addItem(item);
-  ui_->listWidget->setItemWidget(item, item);
+
 }
 

@@ -49,7 +49,7 @@
          <string>Новая стена</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="newOwnItemButton">
+       <widget class="QPushButton" name="newPlayerButton">
         <property name="geometry">
          <rect>
           <x>20</x>
@@ -174,7 +174,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QLCDNumber" name="Score">
+   <widget class="QLCDNumber" name="scoreLCD">
     <property name="geometry">
      <rect>
       <x>840</x>

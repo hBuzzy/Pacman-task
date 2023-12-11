@@ -4,6 +4,7 @@
 #include <QKeyEvent>
 #include <QGraphicsScene>
 #include "pacmanitem.h"
+#include "itemsfactory.h"
 
 class Scene : public QGraphicsScene {
   // Q_OBJECT
@@ -12,7 +13,7 @@ class Scene : public QGraphicsScene {
   const QList<PacmanItem *> &getWalls() const;
   const QList<PacmanItem *> &getCoins() const;
   PacmanItem *getPlayer() const;
-
+  void createEvent(ItemsFactory::ItemsType itemType);
   void setFiguresDragAndDropOption(bool enable);
   bool deleteCoin(PacmanItem *coin);
 
@@ -22,11 +23,11 @@ class Scene : public QGraphicsScene {
   void RemoveSelectedItems();
   void ResetSelectedItemsScale();
 
+
  protected:
   void keyPressEvent(QKeyEvent *event);
   void dragEnterEvent(QGraphicsSceneDragDropEvent *event);
   void dragMoveEvent(QGraphicsSceneDragDropEvent *event);
-  void dropEvent(QGraphicsSceneDragDropEvent *event);
 
  private:
   QList<PacmanItem *> walls_;
