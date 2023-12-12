@@ -105,13 +105,11 @@ void Redactor::dragItem() {
 }
 
 void Redactor::setupGameGrid() {
-    // Очистите сцену перед обновлением
         scene->clear();
         QGraphicsPixmapItem* puckmanItem;
         QGraphicsPixmapItem* hostileItem;
         QGraphicsPixmapItem* coinItem;
 
-        // Заполните сцену значениями из игровой сетки
         for (int i = 0; i < rows_; ++i) {
             for (int j = 0; j < cols_; ++j) {
                 switch (gameGrid_[i][j]) {
@@ -161,10 +159,8 @@ void Redactor::setupGameGrid() {
         coinItem_->setY(8 * gridSize_);
         qDebug() << "coinItem Coordinates: (" << coinItem_->x() << ", " << coinItem_->y() << ")";
 
-        // Установите размер сцены
         view->setSceneRect(0, 0, cols_ * gridSize_, rows_ * gridSize_);
 
-        // Перерисовать сцену
         view->update();
 }
 

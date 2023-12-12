@@ -18,7 +18,6 @@ struct Node {
 
     Node(Point _point, int _distance) : point(_point), distance(_distance) {}
 
-    // Перегрузка оператора "больше" для приоритетной очереди
     bool operator>(const Node& other) const {
         return distance > other.distance;
     }
@@ -64,7 +63,6 @@ vector<char> Hostile::getPath(const Point& end) {
     pq.push(Node(position_, 0));
     distance[position_.y][position_.x] = 0;
 
-    // Возможные смещения влево, вправо, вверх и вниз
     int dx[] = {-1, 1, 0, 0};
     int dy[] = {0, 0, -1, 1};
 
@@ -73,7 +71,7 @@ vector<char> Hostile::getPath(const Point& end) {
         pq.pop();
 
         if (current.point.x == end.x && current.point.y == end.y) {
-            // Мы достигли конечной точки
+
             vector<Point> pathPoints;
             Point currentPoint = end;
 
@@ -121,7 +119,6 @@ vector<char> Hostile::getPath(const Point& end) {
         }
     }
 
-    // Если конечная точка недостижима, возвращаем пустой путь
     return vector<char>();
 }
 
@@ -141,7 +138,7 @@ Point Hostile::getPosition()
 }
 
 int Primer() {
-    // Пример использования
+
     vector<vector<int>> inputMatrix = {
         {0, 0, 0, 0, 0},
         {0, 1, 0, 1, 0},

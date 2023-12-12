@@ -82,8 +82,6 @@ MainWindow::MainWindow(QWidget *parent, int** gameGrid)
                 }
                 matrix.push_back(row);
             }
-
-            // Вывод матрицы
             for (const auto& row : matrix) {
                 for (const auto& element : row) {
                     std::cout << element << " ";
@@ -94,7 +92,6 @@ MainWindow::MainWindow(QWidget *parent, int** gameGrid)
     Hostile newHostile;
     Point p(0, 0);
     if (gameGrid != nullptr) {
-            // Если передан, копируем его значения
             gameGrid_ = new int*[rows_];
             for (int i = 0; i < rows_; ++i) {
                 gameGrid_[i] = new int[cols_];
@@ -102,8 +99,8 @@ MainWindow::MainWindow(QWidget *parent, int** gameGrid)
                     gameGrid_[i][j] = gameGrid[i][j];
                     if(gameGrid_[i][j] == 3)
                     {
-                        p.x = i;
-                        p.y = j;
+                        p.x = j;
+                        p.y = i;
                         newHostile.setPosition(p);
                         qDebug() << "Hostile Coordinates: (" << p.x << ", " << p.y << ")";
                         hostiles_.push_back(newHostile);
@@ -185,19 +182,15 @@ void MainWindow::handleGameOver() {
 }
 
 void MainWindow::generateRandomGameGrid() {
-    // Сбросим генератор случайных чисел
+
     std::srand(std::time(0));
 
-
-
-    // Создадим пустую gameGrid
     for (int i = 0; i < rows_; ++i) {
         for (int j = 0; j < cols_; ++j) {
             gameGrid_[i][j] = 0;
         }
     }
 
-    // Расставим одну двойку
     int randomRow = std::rand() % rows_;
     int randomCol = std::rand() % cols_;
 
@@ -232,7 +225,6 @@ void MainWindow::generateRandomElements(int element, int count) {
                 matrix.push_back(row);
             }
 
-            // Вывод матрицы
             for (const auto& row : matrix) {
                 for (const auto& element : row) {
                     std::cout << element << " ";
@@ -244,7 +236,7 @@ void MainWindow::generateRandomElements(int element, int count) {
     for (int k = 0; k < count; ++k) {
         int randomRow = std::rand() % rows_;
         int randomCol = std::rand() % cols_;
-        // Проверим, что выбранная ячейка еще не содержит 1
+
         while (gameGrid_[randomRow][randomCol] != 0) {
         randomRow = std::rand() % rows_;
         randomCol = std::rand() % cols_;
@@ -261,7 +253,6 @@ void MainWindow::generateRandomElements(int element, int count) {
 }
 
 void MainWindow::setupGameGrid() {
-    // Очистите сцену перед обновлением
         scene->clear();
         QGraphicsPixmapItem* puckmanItem;
         QGraphicsPixmapItem* hostileItem;
@@ -269,10 +260,9 @@ void MainWindow::setupGameGrid() {
         QGraphicsTextItem* coinsLabel = scene->addText("Coins: "+ QString::number(countCoins_));
         coinsLabel->setDefaultTextColor(Qt::black);
         QFont font = coinsLabel->font();
-        font.setPointSize(14);  // Настройте размер шрифта по вашему желанию
+        font.setPointSize(14);
         coinsLabel->setFont(font);
         coinsLabel->setPos(cols_ * gridSize_ + 10, 10);
-        // Заполните сцену значениями из игровой сетки
         for (int i = 0; i < rows_; ++i) {
             for (int j = 0; j < cols_; ++j) {
                 switch (gameGrid_[i][j]) {
@@ -292,7 +282,7 @@ void MainWindow::setupGameGrid() {
                     hostileItem->setX(j * gridSize_);
                     hostileItem->setY(i * gridSize_);
                     break;
-                case 4: // hostile
+                case 4: // coin
                     coinItem = scene->addPixmap(QPixmap(":resource/coin.png").scaled(gridSize_, gridSize_));
                     coinItem->setX(j * gridSize_);
                     coinItem->setY(i * gridSize_);
@@ -301,10 +291,8 @@ void MainWindow::setupGameGrid() {
             }
         }
 
-        // Установите размер сцены
         view->setSceneRect(0, 0, cols_ * gridSize_, rows_ * gridSize_);
 
-        // Перерисовать сцену
         view->update();
 }
 
@@ -314,11 +302,28 @@ void MainWindow::moveHostile()
         qDebug() << "No hostiles found.";
         return;
     }
+    std::vector<std::vector<int>> matrix;
+        for (int i = 0; i < rows_; ++i) {
+            std::vector<int> row;
+            for (int j = 0; j < cols_; ++j) {
+                row.push_back(gameGrid_[i][j]);
+            }
+            matrix.push_back(row);
+        }
+
+        for (const auto& row : matrix) {
+            for (const auto& element : row) {
+                std::cout << element << " ";
+            }
+            std::cout << std::endl;
+        }
+
     std::vector<char> direction;
     Point playerPoint(player_.getX(), player_.getY());
     Point hostilePosition(0,0);
 
     for (Hostile& currentHostile : hostiles_) {
+        currentHostile.setMatrix(matrix);
         direction = currentHostile.getPath(playerPoint);
         if(direction.empty())
         {

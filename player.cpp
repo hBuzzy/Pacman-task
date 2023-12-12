@@ -1,10 +1,8 @@
-// player.cpp
+
 #include "player.h"
 
-// Реализация конструктора по умолчанию
 Player::Player() : x_(0), y_(0) {}
 
-// Геттеры и сеттеры
 int Player::getX() const {
     return x_;
 }

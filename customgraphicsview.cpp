@@ -1,4 +1,4 @@
-// customgraphicsview.cpp
+
 #include "customgraphicsview.h"
 
 #include <QMouseEvent>

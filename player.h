@@ -8,7 +8,7 @@ private:
     int y_;  // Координата y
 
 public:
-    // Конструктор по умолчанию
+
     Player();
 
     int getX() const;
