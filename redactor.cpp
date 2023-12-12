@@ -1,9 +1,9 @@
 #include "redactor.h"
 #include "ui_redactor.h"
+#include "mainwindow.h"
 
 #include <iostream>
 #include <QMainWindow>
-#include <QGraphicsView>
 #include <QGraphicsScene>
 #include <QGraphicsSimpleTextItem>
 #include <QDebug>
@@ -14,14 +14,16 @@ Redactor::Redactor(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::Redactor)
 {
-    setMouseTracking(true);
     ui->setupUi(this);
     setFocusPolicy(Qt::StrongFocus);
 
     scene = new QGraphicsScene(this);
-    view = new QGraphicsView(scene, this);
+    view = new CustomGraphicsView(scene, this, gridSize_);
 
     view->setMouseTracking(true);
+    view->hasMouseTracking();
+
+    connect(view, &CustomGraphicsView::customMouseRelease, this, &Redactor::handleCustomMouseRelease);
 
     int uiWidth = (cols_+6) * gridSize_;
     int uiHeight = (rows_+1) * gridSize_;
@@ -39,9 +41,28 @@ Redactor::Redactor(QWidget *parent) :
         }
     }
 
+    myButton = new QPushButton("Начать игру", this);
+    myButton->setGeometry(10, 10, 100, 30); // Установите положение и размер кнопки
+    connect(myButton, &QPushButton::clicked, this, &Redactor::handleButtonClick);
+
     setupGameGrid();
 
     ui->setupUi(this);
+}
+
+void Redactor::exitRedaction()
+{
+    close();
+    openGame();
+}
+
+void Redactor::openGame() {
+    MainWindow *SG = new MainWindow(nullptr, gameGrid_);
+    SG->show();
+}
+
+void Redactor::handleButtonClick() {
+    exitRedaction();
 }
 
 Redactor::~Redactor()
@@ -54,11 +75,14 @@ Redactor::~Redactor()
 }
 
 void Redactor::paintEvent(QPaintEvent *event) {
-    QPainter painter(this);
     dragItem();
 }
 
 void Redactor::dragItem() {
+    if (dragItem_ != nullptr) {
+        scene->removeItem(dragItem_);
+        delete dragItem_;
+    }
     dragItem_ = new QGraphicsPixmapItem();
     if(dragElement_ == 1)
     {
@@ -76,8 +100,8 @@ void Redactor::dragItem() {
     {
         dragItem_ = scene->addPixmap(QPixmap(":resource/coin.png").scaled(gridSize_, gridSize_));
     }
-    dragItem_->setX(center_.x());
-    dragItem_->setY(center_.y());
+    dragItem_->setX(view->center.x());
+    dragItem_->setY(view->center.y());
 }
 
 void Redactor::setupGameGrid() {
@@ -142,38 +166,61 @@ void Redactor::setupGameGrid() {
 
         // Перерисовать сцену
         view->update();
-        view->setMouseTracking(true);
+}
+
+QPoint Redactor::getGridPoint() {
+    QPoint a(-1, -1);
+    for (int i = 0; i < rows_; ++i) {
+        for (int j = 0; j < cols_; ++j) {
+            if(view->center.x() > i*gridSize_-gridSize_/2 && view->center.x() < i*gridSize_+gridSize_/2)
+            {
+                if(view->center.y() > j*gridSize_-gridSize_/2 && view->center.y() < j*gridSize_+gridSize_/2)
+                {
+                    a.setX(i);
+                    a.setY(j);
+                    qDebug() << "getGridPoint Coordinates: (" << a.x() << ", " << a.y() << ")";
+                    return(a);
+                }
+            }
+        }
+    }
+    qDebug() << "getGridPoint Coordinates: (" << a.x() << ", " << a.y() << ")";
+    return a;
+
 }
 
 int Redactor::getElement() {
-    QGraphicsItem* item = scene->itemAt(center_.x(), center_.y(), QTransform());
-    if(center_.x() < wallItem_->x()+gridSize_ && center_.x() > wallItem_->x()-gridSize_)
+    QGraphicsItem* item = scene->itemAt(view->center.x(), view->center.y(), QTransform());
+    if(view->center.x() < wallItem_->x()+gridSize_ && view->center.x() > wallItem_->x()-gridSize_)
     {
-        if(center_.y() < wallItem_->y()+gridSize_ && center_.y() > wallItem_->y()-gridSize_)
+        if(view->center.y() < wallItem_->y()+gridSize_ && view->center.y() > wallItem_->y()-gridSize_)
         {
             qDebug() << "you drag item: (" << item << ")";
             return 1;
         }
     }
-    if(center_.x() < puckmanItem_->x()+gridSize_ && center_.x() > puckmanItem_->x()-gridSize_)
+    if(view->center.x() < puckmanItem_->x()+gridSize_ && view->center.x() > puckmanItem_->x()-gridSize_)
     {
-        if(center_.y() < puckmanItem_->y()+gridSize_ && center_.y() > puckmanItem_->y()-gridSize_)
+        if(view->center.y() < puckmanItem_->y()+gridSize_ && view->center.y() > puckmanItem_->y()-gridSize_)
         {
-            qDebug() << "you drag item: (" << item << ")";
-            return 2;
+            if(isStatePacmanElement_ == false)
+            {
+                qDebug() << "you drag item: (" << item << ")";
+                return 2;
+            }
         }
     }
-    if(center_.x() < hostileItem_->x()+gridSize_ && center_.x() > hostileItem_->x()-gridSize_)
+    if(view->center.x() < hostileItem_->x()+gridSize_ && view->center.x() > hostileItem_->x()-gridSize_)
     {
-        if(center_.y() < hostileItem_->y()+gridSize_ && center_.y() > hostileItem_->y()-gridSize_)
+        if(view->center.y() < hostileItem_->y()+gridSize_ && view->center.y() > hostileItem_->y()-gridSize_)
         {
             qDebug() << "you drag item: (" << item << ")";
             return 3;
         }
     }
-    if(center_.x() < coinItem_->x()+gridSize_ && center_.x() > coinItem_->x()-gridSize_)
+    if(view->center.x() < coinItem_->x()+gridSize_ && view->center.x() > coinItem_->x()-gridSize_)
     {
-        if(center_.y() < coinItem_->y()+gridSize_ && center_.y() > coinItem_->y()-gridSize_)
+        if(view->center.y() < coinItem_->y()+gridSize_ && view->center.y() > coinItem_->y()-gridSize_)
         {
             qDebug() << "you drag item: (" << item << ")";
             return 4;
@@ -183,43 +230,39 @@ int Redactor::getElement() {
     return 0;
 }
 
-void Redactor::setCursorStyle() {
-    if (isdrawing_) {
-        setCursor(Qt::CrossCursor);
-    } else {
-        setCursor(Qt::ArrowCursor);
-    }
-}
-
 void Redactor::mousePressEvent(QMouseEvent *event) {
     if (event->button() == Qt::LeftButton) {
-        isdrawing_ = true;
+        dragItem_ = new QGraphicsPixmapItem();
+        view->isdrawing = true;
         QPoint localMousePos = event->pos();  // Получаем локальные координаты мыши
-        center_ = view->mapToScene(localMousePos);
-        center_.setX(center_.x() - gridSize_ / 2);
-        center_.setY(center_.y() - gridSize_ / 2);
-        setCursorStyle();
-        qDebug() << "cursor Coordinates: (" << center_.x() << ", " << center_.y() << ")";
+        view->center = view->mapToScene(localMousePos);
+        view->center.setX(view->center.x());
+        view->center.setY(view->center.y());
+        view->setCursorStyle();
+        qDebug() << "cursor Coordinates: (" << view->center.x() << ", " << view->center.y() << ")";
         dragElement_ = getElement();
         qDebug() << "you drag item: (" << getElement() << ")";
+
         update();
     }
+
 }
 
-void Redactor::mouseMoveEvent(QMouseEvent *event) {
-    if (isdrawing_) {
-        center_ = event->pos();
-        update();
-        qDebug() << "cursor Coordinates: (" << center_.x() << ", " << center_.y() << ")";
+void Redactor::handleCustomMouseRelease() {
+    dragItem_ = new QGraphicsPixmapItem();
+    QPoint a = getGridPoint();
+    if(a.x() > 0 || a.y() > 0)
+    {
+        if (gameGrid_[a.y()][a.x()] == 2)
+        {
+            isStatePacmanElement_ = false;
+        }
+        gameGrid_[a.y()][a.x()] = dragElement_;
+        if(dragElement_ == 2)
+        {
+            isStatePacmanElement_ = true;
+        }
     }
-}
-
-void Redactor::mouseReleaseEvent(QMouseEvent *event) {
-    if (event->button() == Qt::LeftButton && isdrawing_) {
-        isdrawing_ = false;
-        setCursorStyle();
-        scene->removeItem(dragItem_);
-        delete dragItem_;
-        setupGameGrid();
-    }
+    update();
+    setupGameGrid();
 }

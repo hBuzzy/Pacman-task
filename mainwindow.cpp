@@ -36,12 +36,97 @@ MainWindow::MainWindow(QWidget *parent)
     hostileRunTimer_->start(1000);
     connect(hostileRunTimer_, SIGNAL(timeout()), this, SLOT(updateHostileRunTime()));
 
+
     gameGrid_ = new int*[rows_];
     for (int i = 0; i < rows_; ++i) {
         gameGrid_[i] = new int[cols_];
     }
+        generateRandomGameGrid();
 
-    generateRandomGameGrid();
+    setupGameGrid();
+}
+
+MainWindow::MainWindow(QWidget *parent, int** gameGrid)
+    : QMainWindow(parent), ui(new Ui::MainWindow) {
+
+
+    ui->setupUi(this);
+    setFocusPolicy(Qt::StrongFocus);
+
+    hostiles_.reserve(cols_*rows_);
+
+    scene = new QGraphicsScene(this);
+    view = new QGraphicsView(scene, this);
+
+    int uiWidth = (cols_+4) * gridSize_;
+    int uiHeight = (rows_+1) * gridSize_;
+
+    this->setFixedSize(uiWidth, uiHeight);
+    setCentralWidget(view);
+
+    gameTimer_ = new QTimer(this);
+    gameTimer_->start(250);
+    connect(gameTimer_, SIGNAL(timeout()), this, SLOT(updateGameTime()));
+
+    hostileRunTimer_ = new QTimer(this);
+    hostileRunTimer_->start(1000);
+    connect(hostileRunTimer_, SIGNAL(timeout()), this, SLOT(updateHostileRunTime()));
+
+    if (gameGrid != nullptr) {
+        countCoins_ = 0;
+        std::vector<std::vector<int>> matrix;
+            for (int i = 0; i < rows_; ++i) {
+                std::vector<int> row;
+                for (int j = 0; j < cols_; ++j) {
+                    row.push_back(gameGrid[i][j]);
+                }
+                matrix.push_back(row);
+            }
+
+            // Вывод матрицы
+            for (const auto& row : matrix) {
+                for (const auto& element : row) {
+                    std::cout << element << " ";
+                }
+                std::cout << std::endl;
+            }
+    }
+    Hostile newHostile;
+    Point p(0, 0);
+    if (gameGrid != nullptr) {
+            // Если передан, копируем его значения
+            gameGrid_ = new int*[rows_];
+            for (int i = 0; i < rows_; ++i) {
+                gameGrid_[i] = new int[cols_];
+                for (int j = 0; j < cols_; ++j) {
+                    gameGrid_[i][j] = gameGrid[i][j];
+                    if(gameGrid_[i][j] == 3)
+                    {
+                        p.x = i;
+                        p.y = j;
+                        newHostile.setPosition(p);
+                        qDebug() << "Hostile Coordinates: (" << p.x << ", " << p.y << ")";
+                        hostiles_.push_back(newHostile);
+                    }
+                    if(gameGrid_[i][j] == 4)
+                    {
+                        countCoins_++;
+                    }
+                    if(gameGrid_[i][j] == 2)
+                    {
+                        player_.setY(i);
+                        player_.setX(j);
+                    }
+                }
+            }
+        } else {
+        gameGrid_ = new int*[rows_];
+        for (int i = 0; i < rows_; ++i) {
+            gameGrid_[i] = new int[cols_];
+        }
+        generateRandomGameGrid();
+    }
+
     setupGameGrid();
 }
 

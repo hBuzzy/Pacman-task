@@ -3,9 +3,10 @@
 
 #include <QWidget>
 #include <QGraphicsScene>
-#include <QGraphicsView>
+#include <QPushButton>
 
 #include "mainwindow.h"
+#include "customgraphicsview.h"
 
 namespace Ui {
 class Redactor;
@@ -21,8 +22,6 @@ public:
 protected:
     void paintEvent(QPaintEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
-    void mouseMoveEvent(QMouseEvent *event) override;
-    void mouseReleaseEvent(QMouseEvent *event) override;
 
 private:
     Ui::Redactor *ui;
@@ -33,7 +32,7 @@ private:
     int gridSize_ = 64;
     void setupGameGrid();
     QGraphicsScene *scene;
-    QGraphicsView *view;
+    CustomGraphicsView *view;
     bool isdrawing_ = false;
     QPointF center_;
     int lineWidth_;
@@ -44,12 +43,17 @@ private:
     QGraphicsPixmapItem* puckmanItem_;
     QGraphicsPixmapItem* hostileItem_;
     QGraphicsPixmapItem* coinItem_;
-    QGraphicsPixmapItem* dragItem_;
+    QGraphicsPixmapItem* dragItem_ = nullptr;
+    QPoint getGridPoint();
     int dragElement_;
     void dragItem();
+    void handleCustomMouseRelease();
+    bool isStatePacmanElement_ = false;
+    QPushButton *myButton;
+    void handleButtonClick();
+    void openGame();
+    void exitRedaction();
 
-private slots:
-    void setCursorStyle();
 };
 
 #endif // REDACTOR_H

@@ -24,7 +24,7 @@ void StartGame::loadUI(){
 void StartGame::on_play_button_clicked()
 {
     this->close();
-    MainWindow *game = new MainWindow();
+    MainWindow *game = new MainWindow(nullptr, nullptr);
     game->show();
 }
 

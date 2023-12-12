@@ -1,56 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <author/>
- <comment/>
- <exportmacro/>
  <class>StartGame</class>
  <widget class="QWidget" name="StartGame">
- <property name="geometry">
-  <rect>
-   <x>0</x>
-   <y>0</y>
-   <width>500</width>
-   <height>550</height>
-  </rect>
- </property>
- <property name="windowTitle">
-  <string>Pacman</string>
- </property>
- <property name="styleSheet">
-  <string notr="true"/>
- </property>
- <widget class="QWidget" name="centralWidget">
-  <widget class="QPushButton" name="play_button">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>500</width>
+    <height>550</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Pacman</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
+  <widget class="QWidget" name="centralWidget" native="true">
    <property name="geometry">
     <rect>
-     <x>190</x>
-     <y>170</y>
-     <width>90</width>
-     <height>30</height>
+     <x>0</x>
+     <y>0</y>
+     <width>470</width>
+     <height>370</height>
     </rect>
    </property>
-   <property name="text">
-    <string>PLAY</string>
-   </property>
   </widget>
- </widget>
- <widget class="QWidget" name="centralWidget">
-  <widget class="QPushButton" name="redactor_button">
+  <widget class="QWidget" name="centralWidget" native="true">
    <property name="geometry">
     <rect>
-     <x>190</x>
-     <y>210</y>
-     <width>120</width>
-     <height>30</height>
+     <x>0</x>
+     <y>0</y>
+     <width>500</width>
+     <height>450</height>
     </rect>
    </property>
-   <property name="text">
-    <string>REDACTOR</string>
-   </property>
+   <widget class="QPushButton" name="play_button">
+    <property name="geometry">
+     <rect>
+      <x>190</x>
+      <y>190</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>PLAY</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="redactor_button">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>260</y>
+      <width>101</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>REDACTOR</string>
+    </property>
+   </widget>
   </widget>
  </widget>
-</widget>
-
-<layoutdefault spacing="6" margin="11"/>
-<resources/>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
  <connections/>
 </ui>

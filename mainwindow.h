@@ -19,6 +19,7 @@ Q_OBJECT
 
 public:
     MainWindow(QWidget *parent = nullptr);
+    MainWindow(QWidget *parent = nullptr, int** gameGrid = nullptr);
     ~MainWindow();
 
     void generateRandomGameGrid();
