@@ -17,8 +17,8 @@ StartGame::~StartGame()
 }
 
 void StartGame::loadUI(){
-    ui->play_button->setFont(QFont(default_font_family_, font_size_));
-    ui->redactor_button->setFont(QFont(default_font_family_, font_size_));
+    ui->play_button->setFont(QFont(kdefaultFontFamily_, kFontSize_));
+    ui->redactor_button->setFont(QFont(kdefaultFontFamily_, kFontSize_));
 }
 
 void StartGame::on_play_button_clicked()

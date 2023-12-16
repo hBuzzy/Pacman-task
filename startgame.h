@@ -3,8 +3,9 @@
 
 #include <QWidget>
 
-namespace Ui {
-class StartGame;
+namespace Ui
+{
+    class StartGame;
 }
 
 class StartGame : public QWidget
@@ -21,8 +22,9 @@ private slots:
 
 private:
     Ui::StartGame *ui;
-    static const int font_size_ = 15;
-    const QString default_font_family_ = "Default";
+    static const int kFontSize_ = 15;
+    const QString kdefaultFontFamily_ = "Default";
+
     void loadUI();
 };
 

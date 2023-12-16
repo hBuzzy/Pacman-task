@@ -1,6 +1,7 @@
 #include "redactor.h"
 #include "ui_redactor.h"
 #include "mainwindow.h"
+#include "startgame.h"
 
 #include <iostream>
 #include <QMainWindow>
@@ -18,31 +19,34 @@ Redactor::Redactor(QWidget *parent) :
     setFocusPolicy(Qt::StrongFocus);
 
     scene = new QGraphicsScene(this);
-    view = new CustomGraphicsView(scene, this, gridSize_);
+    view = new CustomGraphicsView(scene, this, cellSize_);
 
     view->setMouseTracking(true);
     view->hasMouseTracking();
 
     connect(view, &CustomGraphicsView::customMouseRelease, this, &Redactor::handleCustomMouseRelease);
 
-    int uiWidth = (cols_+6) * gridSize_;
-    int uiHeight = (rows_+1) * gridSize_;
+    int uiWidth = (kColumns_+6) * cellSize_;
+    int uiHeight = (kRows_+1) * cellSize_;
 
     this->setFixedSize(uiWidth, uiHeight);
     setCentralWidget(view);
 
-    gameGrid_ = new int*[rows_];
-    for (int i = 0; i < rows_; ++i) {
-        gameGrid_[i] = new int[cols_];
+    gameGrid_ = new int*[kRows_];
+    for (int i = 0; i < kRows_; ++i)
+    {
+        gameGrid_[i] = new int[kColumns_];
     }
-    for (int i = 0; i < rows_; ++i) {
-        for (int j = 0; j < cols_; ++j) {
+    for (int i = 0; i < kRows_; ++i)
+    {
+        for (int j = 0; j < kColumns_; ++j)
+        {
             gameGrid_[i][j] = 0;
         }
     }
 
     myButton = new QPushButton("Начать игру", this);
-    myButton->setGeometry(10, 10, 100, 30); // Установите положение и размер кнопки
+    myButton->setGeometry(10, 10, 100, 30);
     connect(myButton, &QPushButton::clicked, this, &Redactor::handleButtonClick);
 
     setupGameGrid();
@@ -56,186 +60,210 @@ void Redactor::exitRedaction()
     openGame();
 }
 
-void Redactor::openGame() {
-    MainWindow *SG = new MainWindow(nullptr, gameGrid_);
-    SG->show();
+void Redactor::openGame()
+{
+    MainWindow *startGame = new MainWindow(nullptr, gameGrid_);
+    startGame->show();
 }
 
-void Redactor::handleButtonClick() {
+void Redactor::handleButtonClick()
+{
+    if(counsCount_ <= 0)
+    {
+        std::string str1 = "couns count < 0";
+        const char* charArray = str1.c_str();
+        QMessageBox::information(this, "False", charArray);
+        return;
+    }
     exitRedaction();
 }
 
 Redactor::~Redactor()
 {
-    for (int i = 0; i < rows_; ++i) {
+    for (int i = 0; i < kRows_; ++i)
+    {
         delete[] gameGrid_[i];
     }
     delete[] gameGrid_;
     delete ui;
 }
 
-void Redactor::paintEvent(QPaintEvent *event) {
+void Redactor::paintEvent(QPaintEvent *event)
+{
     dragItem();
 }
 
-void Redactor::dragItem() {
-    if (dragItem_ != nullptr) {
+void Redactor::dragItem()
+{
+    if (dragItem_ != nullptr)
+    {
         scene->removeItem(dragItem_);
         delete dragItem_;
     }
     dragItem_ = new QGraphicsPixmapItem();
-    if(dragElement_ == 1)
+    if(dragElement_ == GameElement::Wall)
     {
-        dragItem_ = scene->addPixmap(QPixmap(":resource/wall.png").scaled(gridSize_, gridSize_));
+        dragItem_ = scene->addPixmap(QPixmap(":resource/wall.png").scaled(cellSize_, cellSize_));
     }
-    if(dragElement_ == 2)
+    if(dragElement_ == GameElement::Puckman)
     {
-        dragItem_ = scene->addPixmap(QPixmap(":resource/puckman.png").scaled(gridSize_, gridSize_));
+        dragItem_ = scene->addPixmap(QPixmap(":resource/puckman.png").scaled(cellSize_, cellSize_));
     }
-    if(dragElement_ == 3)
+    if(dragElement_ == GameElement::Hostile)
     {
-        dragItem_ = scene->addPixmap(QPixmap(":resource/hostile.png").scaled(gridSize_, gridSize_));
+        dragItem_ = scene->addPixmap(QPixmap(":resource/hostile.png").scaled(cellSize_, cellSize_));
     }
-    if(dragElement_ == 4)
+    if(dragElement_ == GameElement::Coin)
     {
-        dragItem_ = scene->addPixmap(QPixmap(":resource/coin.png").scaled(gridSize_, gridSize_));
+        dragItem_ = scene->addPixmap(QPixmap(":resource/coin.png").scaled(cellSize_, cellSize_));
     }
-    dragItem_->setX(view->center.x());
-    dragItem_->setY(view->center.y());
+    dragItem_->setX(view->getCenterX());
+    dragItem_->setY(view->getCenterY());
 }
 
-void Redactor::setupGameGrid() {
+void Redactor::setupGameGrid()
+{
         scene->clear();
         QGraphicsPixmapItem* puckmanItem;
         QGraphicsPixmapItem* hostileItem;
         QGraphicsPixmapItem* coinItem;
 
-        for (int i = 0; i < rows_; ++i) {
-            for (int j = 0; j < cols_; ++j) {
-                switch (gameGrid_[i][j]) {
-                case 0: // Empty space
-                    scene->addRect(j * gridSize_, i * gridSize_, gridSize_, gridSize_, QPen(Qt::black), QBrush(Qt::white));
+        for (int i = 0; i < kRows_; ++i)
+        {
+            for (int j = 0; j < kColumns_; ++j)
+            {
+
+                switch (gameGrid_[i][j])
+                {
+                case GameElement::Empty:
+                    scene->addRect(j * cellSize_, i * cellSize_, cellSize_, cellSize_, QPen(Qt::black), QBrush(Qt::white));
                     break;
-                case 1: // Wall
-                    scene->addRect(j * gridSize_, i * gridSize_, gridSize_, gridSize_, QPen(Qt::black), QBrush(Qt::darkGray));
+                case GameElement::Wall:
+                    scene->addRect(j * cellSize_, i * cellSize_, cellSize_, cellSize_, QPen(Qt::black), QBrush(Qt::darkGray));
                     break;
-                case 2: // player
-                    puckmanItem = scene->addPixmap(QPixmap(":resource/puckman.png").scaled(gridSize_, gridSize_));
-                    puckmanItem->setX(j * gridSize_);
-                    puckmanItem->setY(i * gridSize_);
+                case GameElement::Puckman:
+                    puckmanItem = scene->addPixmap(QPixmap(":resource/puckman.png").scaled(cellSize_, cellSize_));
+                    puckmanItem->setX(j * cellSize_);
+                    puckmanItem->setY(i * cellSize_);
                     break;
-                case 3: // hostile
-                    hostileItem = scene->addPixmap(QPixmap(":resource/hostile.png").scaled(gridSize_, gridSize_));
-                    hostileItem->setX(j * gridSize_);
-                    hostileItem->setY(i * gridSize_);
+                case GameElement::Hostile:
+                    hostileItem = scene->addPixmap(QPixmap(":resource/hostile.png").scaled(cellSize_, cellSize_));
+                    hostileItem->setX(j * cellSize_);
+                    hostileItem->setY(i * cellSize_);
                     break;
-                case 4: // hostile
-                    coinItem = scene->addPixmap(QPixmap(":resource/coin.png").scaled(gridSize_, gridSize_));
-                    coinItem->setX(j * gridSize_);
-                    coinItem->setY(i * gridSize_);
+                case GameElement::Coin:
+                    coinItem = scene->addPixmap(QPixmap(":resource/coin.png").scaled(cellSize_, cellSize_));
+                    coinItem->setX(j * cellSize_);
+                    coinItem->setY(i * cellSize_);
                     break;
                 }
             }
         }
         int RETURN = 2;
 
-        wallItem_ = scene->addPixmap(QPixmap(":resource/wall.png").scaled(gridSize_, gridSize_));
-        wallItem_->setX((cols_+RETURN) * gridSize_);
-        wallItem_->setY(1 * gridSize_);
+        wallItem_ = scene->addPixmap(QPixmap(":resource/wall.png").scaled(cellSize_, cellSize_));
+        wallItem_->setX((kColumns_+RETURN) * cellSize_);
+        wallItem_->setY(1 * cellSize_);
         qDebug() << "wallItem Coordinates: (" << wallItem_->x() << ", " << wallItem_->y() << ")";
 
-        puckmanItem_ = scene->addPixmap(QPixmap(":resource/puckman.png").scaled(gridSize_, gridSize_));
-        puckmanItem_->setX((cols_+RETURN) * gridSize_);
-        puckmanItem_->setY(4 * gridSize_);
+        puckmanItem_ = scene->addPixmap(QPixmap(":resource/puckman.png").scaled(cellSize_, cellSize_));
+        puckmanItem_->setX((kColumns_+RETURN) * cellSize_);
+        puckmanItem_->setY(4 * cellSize_);
         qDebug() << "puckmanItem Coordinates: (" << puckmanItem_->x() << ", " << puckmanItem_->y() << ")";
 
-        hostileItem_ = scene->addPixmap(QPixmap(":resource/hostile.png").scaled(gridSize_, gridSize_));
-        hostileItem_->setX((cols_+RETURN) * gridSize_);
-        hostileItem_->setY(6 * gridSize_);
+        hostileItem_ = scene->addPixmap(QPixmap(":resource/hostile.png").scaled(cellSize_, cellSize_));
+        hostileItem_->setX((kColumns_+RETURN) * cellSize_);
+        hostileItem_->setY(6 * cellSize_);
         qDebug() << "hostileItem Coordinates: (" << hostileItem_->x() << ", " << hostileItem_->y() << ")";
 
-        coinItem_ = scene->addPixmap(QPixmap(":resource/coin.png").scaled(gridSize_, gridSize_));
-        coinItem_->setX((cols_+RETURN) * gridSize_);
-        coinItem_->setY(8 * gridSize_);
+        coinItem_ = scene->addPixmap(QPixmap(":resource/coin.png").scaled(cellSize_, cellSize_));
+        coinItem_->setX((kColumns_+RETURN) * cellSize_);
+        coinItem_->setY(8 * cellSize_);
         qDebug() << "coinItem Coordinates: (" << coinItem_->x() << ", " << coinItem_->y() << ")";
 
-        view->setSceneRect(0, 0, cols_ * gridSize_, rows_ * gridSize_);
+        view->setSceneRect(0, 0, kColumns_ * cellSize_, kRows_ * cellSize_);
 
         view->update();
 }
 
-QPoint Redactor::getGridPoint() {
-    QPoint a(-1, -1);
-    for (int i = 0; i < rows_; ++i) {
-        for (int j = 0; j < cols_; ++j) {
-            if(view->center.x() > i*gridSize_-gridSize_/2 && view->center.x() < i*gridSize_+gridSize_/2)
+QPoint Redactor::getGridPoint()
+{
+    QPoint coordinateElementGrid(-1, -1);
+    int halfGridSize = cellSize_ / 2;
+    for (int i = 0; i < kRows_; ++i)
+    {
+        for (int j = 0; j < kColumns_; ++j)
+        {
+            if(view->getCenterX()> i*cellSize_-halfGridSize && view->getCenterX()< i*cellSize_+halfGridSize)
             {
-                if(view->center.y() > j*gridSize_-gridSize_/2 && view->center.y() < j*gridSize_+gridSize_/2)
+                if(view->getCenterY() > j*cellSize_-halfGridSize && view->getCenterY() < j*cellSize_+halfGridSize)
                 {
-                    a.setX(i);
-                    a.setY(j);
-                    qDebug() << "getGridPoint Coordinates: (" << a.x() << ", " << a.y() << ")";
-                    return(a);
+                    coordinateElementGrid.setX(i);
+                    coordinateElementGrid.setY(j);
+                    qDebug() << "getGridPoint Coordinates: (" << coordinateElementGrid.x() << ", " << coordinateElementGrid.y() << ")";
+                    return(coordinateElementGrid);
                 }
             }
         }
     }
-    qDebug() << "getGridPoint Coordinates: (" << a.x() << ", " << a.y() << ")";
-    return a;
-
+    qDebug() << "getGridPoint Coordinates: (" << coordinateElementGrid.x() << ", " << coordinateElementGrid.y() << ")";
+    return coordinateElementGrid;
 }
 
-int Redactor::getElement() {
-    QGraphicsItem* item = scene->itemAt(view->center.x(), view->center.y(), QTransform());
-    if(view->center.x() < wallItem_->x()+gridSize_ && view->center.x() > wallItem_->x()-gridSize_)
+int Redactor::getElement()
+{
+    QGraphicsItem* item = scene->itemAt(view->getCenterX(), view->getCenterY(), QTransform());
+    if(view->getCenterX()< wallItem_->x()+cellSize_ && view->getCenterX()> wallItem_->x()-cellSize_)
     {
-        if(view->center.y() < wallItem_->y()+gridSize_ && view->center.y() > wallItem_->y()-gridSize_)
+        if(view->getCenterY() < wallItem_->y()+cellSize_ && view->getCenterY() > wallItem_->y()-cellSize_)
         {
             qDebug() << "you drag item: (" << item << ")";
-            return 1;
+            return GameElement::Wall;
         }
     }
-    if(view->center.x() < puckmanItem_->x()+gridSize_ && view->center.x() > puckmanItem_->x()-gridSize_)
+    if(view->getCenterX()< puckmanItem_->x()+cellSize_ && view->getCenterX()> puckmanItem_->x()-cellSize_)
     {
-        if(view->center.y() < puckmanItem_->y()+gridSize_ && view->center.y() > puckmanItem_->y()-gridSize_)
+        if(view->getCenterY() < puckmanItem_->y()+cellSize_ && view->getCenterY() > puckmanItem_->y()-cellSize_)
         {
             if(isStatePacmanElement_ == false)
             {
                 qDebug() << "you drag item: (" << item << ")";
-                return 2;
+                return GameElement::Puckman;
             }
         }
     }
-    if(view->center.x() < hostileItem_->x()+gridSize_ && view->center.x() > hostileItem_->x()-gridSize_)
+    if(view->getCenterX()< hostileItem_->x()+cellSize_ && view->getCenterX()> hostileItem_->x()-cellSize_)
     {
-        if(view->center.y() < hostileItem_->y()+gridSize_ && view->center.y() > hostileItem_->y()-gridSize_)
+        if(view->getCenterY() < hostileItem_->y()+cellSize_ && view->getCenterY() > hostileItem_->y()-cellSize_)
         {
             qDebug() << "you drag item: (" << item << ")";
-            return 3;
+            return GameElement::Hostile;
         }
     }
-    if(view->center.x() < coinItem_->x()+gridSize_ && view->center.x() > coinItem_->x()-gridSize_)
+    if(view->getCenterX()< coinItem_->x()+cellSize_ && view->getCenterX()> coinItem_->x()-cellSize_)
     {
-        if(view->center.y() < coinItem_->y()+gridSize_ && view->center.y() > coinItem_->y()-gridSize_)
+        if(view->getCenterY() < coinItem_->y()+cellSize_ && view->getCenterY() > coinItem_->y()-cellSize_)
         {
             qDebug() << "you drag item: (" << item << ")";
-            return 4;
+            return GameElement::Coin;
         }
     }
     qDebug() << "you drag item: (" << item << ")";
     return 0;
 }
 
-void Redactor::mousePressEvent(QMouseEvent *event) {
-    if (event->button() == Qt::LeftButton) {
+void Redactor::mousePressEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::LeftButton)
+    {
         dragItem_ = new QGraphicsPixmapItem();
-        view->isdrawing = true;
-        QPoint localMousePos = event->pos();  // Получаем локальные координаты мыши
-        view->center = view->mapToScene(localMousePos);
-        view->center.setX(view->center.x());
-        view->center.setY(view->center.y());
+        view->setDrawing(true);
+        QPoint localMousePos = event->pos();
+        view->setCenter(view->mapToScene(localMousePos));
+        view->setCenterX(view->getCenterX());
+        view->setCenterY(view->getCenterY());
         view->setCursorStyle();
-        qDebug() << "cursor Coordinates: (" << view->center.x() << ", " << view->center.y() << ")";
+        qDebug() << "cursor Coordinates: (" << view->getCenterX()<< ", " << view->getCenterY() << ")";
         dragElement_ = getElement();
         qDebug() << "you drag item: (" << getElement() << ")";
 
@@ -244,19 +272,29 @@ void Redactor::mousePressEvent(QMouseEvent *event) {
 
 }
 
-void Redactor::handleCustomMouseRelease() {
+void Redactor::handleCustomMouseRelease()
+{
     dragItem_ = new QGraphicsPixmapItem();
-    QPoint a = getGridPoint();
-    if(a.x() > 0 || a.y() > 0)
+    QPoint cell = getGridPoint();
+    if(cell.x() > 0 || cell.y() > 0)
     {
-        if (gameGrid_[a.y()][a.x()] == 2)
+        if (gameGrid_[cell.y()][cell.x()] == GameElement::Puckman)
         {
             isStatePacmanElement_ = false;
         }
-        gameGrid_[a.y()][a.x()] = dragElement_;
-        if(dragElement_ == 2)
+        if (gameGrid_[cell.y()][cell.x()] == GameElement::Coin)
+        {
+            counsCount_--;
+        }
+        gameGrid_[cell.y()][cell.x()] = dragElement_;
+        if(dragElement_ == GameElement::Puckman)
         {
             isStatePacmanElement_ = true;
+        }
+        if(dragElement_ == GameElement::Coin)
+        {
+            counsCount_++;
+            qDebug() << "counsCount = (" << counsCount_ << ")";
         }
     }
     update();

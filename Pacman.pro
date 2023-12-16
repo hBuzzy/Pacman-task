@@ -10,6 +10,7 @@ CONFIG += c++17
 
 SOURCES += \
     customgraphicsview.cpp \
+    gameelement.cpp \
     hostile.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -19,6 +20,7 @@ SOURCES += \
 
 HEADERS += \
     customgraphicsview.h \
+    gameelement.h \
     hostile.h \
     mainwindow.h \
     player.h \

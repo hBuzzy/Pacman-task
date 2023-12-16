@@ -8,11 +8,13 @@
 #include "mainwindow.h"
 #include "customgraphicsview.h"
 
-namespace Ui {
-class Redactor;
+namespace Ui
+{
+    class Redactor;
 }
 
-class Redactor : public QMainWindow {
+class Redactor : public QMainWindow
+{
     Q_OBJECT
 
 public:
@@ -27,33 +29,34 @@ private:
     Ui::Redactor *ui;
     MainWindow *MW;
     int **gameGrid_;
-    const int rows_ = 10;
-    const int cols_ = 10;
-    int gridSize_ = 64;
-    void setupGameGrid();
+    const int kRows_ = 10;
+    const int kColumns_ = 10;
+    int cellSize_ = 64;
+    int counsCount_ = 0;
     QGraphicsScene *scene;
     CustomGraphicsView *view;
-    bool isdrawing_ = false;
+    bool isDrawing_ = false;
     QPointF center_;
     int lineWidth_;
     QColor lineColor_;
-    void drawItems(QPainter *painter, const QPoint &center);
-    int getElement();
+    int dragElement_;
     QGraphicsPixmapItem* wallItem_;
     QGraphicsPixmapItem* puckmanItem_;
     QGraphicsPixmapItem* hostileItem_;
     QGraphicsPixmapItem* coinItem_;
     QGraphicsPixmapItem* dragItem_ = nullptr;
-    QPoint getGridPoint();
-    int dragElement_;
-    void dragItem();
-    void handleCustomMouseRelease();
     bool isStatePacmanElement_ = false;
     QPushButton *myButton;
+
+    void setupGameGrid();
+    void drawItems(QPainter *painter, const QPoint &center);
+    QPoint getGridPoint();
+    void dragItem();
+    void handleCustomMouseRelease();
     void handleButtonClick();
     void openGame();
     void exitRedaction();
-
+    int getElement();
 };
 
 #endif // REDACTOR_H
