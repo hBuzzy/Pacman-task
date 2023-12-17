@@ -16,7 +16,7 @@ public:
     int getCenterY() const;
     void setCenterX(int newX);
     void setCenterY(int newY);
-    void setCenter(QPointF newCenter);
+    void setCenter(QPointF isDrawing);
     void setDrawing(bool newDrawing);
 
 protected:

@@ -23,8 +23,8 @@ MainWindow::MainWindow(QWidget *parent)
     scene_ = new QGraphicsScene(this);
     view_ = new QGraphicsView(scene_, this);
 
-    int uiWidth = (kColumns_+4) * cellSize_;
-    int uiHeight = (kRows_+1) * cellSize_;
+    int uiWidth = (kColumns_ + 4) * cellSize_;
+    int uiHeight = (kRows_ + 1) * cellSize_;
 
     this->setFixedSize(uiWidth, uiHeight);
     setCentralWidget(view_);
@@ -58,8 +58,8 @@ MainWindow::MainWindow(QWidget *parent, int** gameGrid)
     scene_ = new QGraphicsScene(this);
     view_ = new QGraphicsView(scene_, this);
 
-    int uiWidth = (kColumns_+4) * cellSize_;
-    int uiHeight = (kRows_+1) * cellSize_;
+    int uiWidth = (kColumns_ + 4) * cellSize_;
+    int uiHeight = (kRows_ + 1) * cellSize_;
 
     this->setFixedSize(uiWidth, uiHeight);
     setCentralWidget(view_);
@@ -171,7 +171,7 @@ void MainWindow::gameOver(bool isWin)
 {
     disconnect(gameTimer_, SIGNAL(timeout()), this, SLOT(updateGameTime()));
     disconnect(hostileRunTimer_, SIGNAL(timeout()), this, SLOT(updateHostileRunTime()));
-    if(isWin)
+    if (isWin)
     {
         std::string str1 = "You WIN!";
         const char* charArray = str1.c_str();
@@ -233,7 +233,7 @@ void MainWindow::generateRandomElements(int element, int count)
 {
     Hostile newHostile;
     Point p(0,0);
-    if(element == 3)
+    if (element == 3)
     {
         std::vector<std::vector<int>> matrix;
             for (int i = 0; i < kRows_; ++i)
@@ -353,7 +353,7 @@ void MainWindow::moveHostile()
             std::cout << std::endl;
         }
 
-    std::vector<std::string> direction;
+    std::vector<Directions> direction;
     Point playerPoint(player_.getX(), player_.getY());
     Point hostilePosition(0,0);
 
@@ -361,29 +361,29 @@ void MainWindow::moveHostile()
     {
         currentHostile.setMatrix(matrix);
         direction = currentHostile.getPath(playerPoint);
-        if(direction.empty())
+        if (direction.empty())
         {
             return;
         }
-        if(direction[0] == "Left")
+        if (direction[0] == Directions::Left)
         {
             hostilePosition = currentHostile.getPosition();
             gameGrid_[hostilePosition.y][hostilePosition.x] = currentHostile.getPreviousElement();
-            currentHostile.setPreviousElement(gameGrid_[hostilePosition.y][hostilePosition.x-1]);
+            currentHostile.setPreviousElement(gameGrid_[hostilePosition.y][hostilePosition.x - 1]);
             hostilePosition.x = hostilePosition.x - 1;
             gameGrid_[hostilePosition.y][hostilePosition.x] = 3;
             currentHostile.setPosition(hostilePosition);
         }
-        if(direction[0] == "Right")
+        if (direction[0] == Directions::Right)
         {
             hostilePosition = currentHostile.getPosition();
             gameGrid_[hostilePosition.y][hostilePosition.x] = currentHostile.getPreviousElement();
-            currentHostile.setPreviousElement(gameGrid_[hostilePosition.y][hostilePosition.x+1]);
+            currentHostile.setPreviousElement(gameGrid_[hostilePosition.y][hostilePosition.x + 1]);
             hostilePosition.x = hostilePosition.x + 1;
             gameGrid_[hostilePosition.y][hostilePosition.x] = 3;
             currentHostile.setPosition(hostilePosition);
         }
-        if(direction[0] == "Up")
+        if (direction[0] == Directions::Up)
         {
 
             hostilePosition = currentHostile.getPosition();
@@ -394,7 +394,7 @@ void MainWindow::moveHostile()
             qDebug() << "gameGrid_ Coordinates: (" << hostilePosition.x << ", " << hostilePosition.y << ")";
             currentHostile.setPosition(hostilePosition);
         }
-        if(direction[0] == "Down")
+        if (direction[0] == Directions::Down)
         {
 
             hostilePosition = currentHostile.getPosition();
@@ -409,7 +409,7 @@ void MainWindow::moveHostile()
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {
-    if(isKeyTime_)
+    if (isKeyTime_)
     {
         switch (event->key())
         {
@@ -440,14 +440,14 @@ void MainWindow::movePlayerUp()
 {
     if (player_.getY() > 0)
     {
-        if(gameGrid_[player_.getY()-1][player_.getX()] != GameElement::Wall)
+        if (gameGrid_[player_.getY() - 1][player_.getX()] != GameElement::Wall)
         {
             gameGrid_[player_.getY()][player_.getX()] = GameElement::Empty;
-            if(gameGrid_[player_.getY()-1][player_.getX()] == GameElement::Coin)
+            if (gameGrid_[player_.getY() - 1][player_.getX()] == GameElement::Coin)
             {
                 counsCount_--;
             }
-            gameGrid_[player_.getY()-1][player_.getX()] = GameElement::Puckman;
+            gameGrid_[player_.getY() - 1][player_.getX()] = GameElement::Puckman;
             player_.setY(player_.getY() - 1);
             qDebug() << "Player Coordinates: (" << player_.getX() << ", " << player_.getY() << ")";
         }
@@ -458,10 +458,10 @@ void MainWindow::movePlayerDown()
 {
     if (player_.getY()+1 < kRows_)
     {
-        if(gameGrid_[player_.getY()+1][player_.getX()] != GameElement::Wall)
+        if (gameGrid_[player_.getY()+1][player_.getX()] != GameElement::Wall)
         {
             gameGrid_[player_.getY()][player_.getX()] = GameElement::Empty;
-            if(gameGrid_[player_.getY()+1][player_.getX()] == GameElement::Coin)
+            if (gameGrid_[player_.getY()+1][player_.getX()] == GameElement::Coin)
             {
                 counsCount_--;
             }
@@ -474,16 +474,16 @@ void MainWindow::movePlayerDown()
 
 void MainWindow::movePlayerLeft()
 {
-    if(gameGrid_[player_.getY()][player_.getX()-1] != GameElement::Wall)
+    if (gameGrid_[player_.getY()][player_.getX() - 1] != GameElement::Wall)
     {
         if (player_.getX() > 0)
         {
             gameGrid_[player_.getY()][player_.getX()] = GameElement::Empty;
-            if(gameGrid_[player_.getY()][player_.getX()-1] == GameElement::Coin)
+            if (gameGrid_[player_.getY()][player_.getX() - 1] == GameElement::Coin)
             {
                 counsCount_--;
             }
-            gameGrid_[player_.getY()][player_.getX()-1] = GameElement::Puckman;
+            gameGrid_[player_.getY()][player_.getX() - 1] = GameElement::Puckman;
             player_.setX(player_.getX() - 1);
             qDebug() << "Player Coordinates: (" << player_.getX() << ", " << player_.getY() << ")";
         }
@@ -492,16 +492,16 @@ void MainWindow::movePlayerLeft()
 
 void MainWindow::movePlayerRight()
 {
-    if (player_.getX()+1 < kColumns_)
+    if (player_.getX() + 1 < kColumns_)
     {
-        if(gameGrid_[player_.getY()][player_.getX()+1] != GameElement::Wall)
+        if (gameGrid_[player_.getY()][player_.getX() + 1] != GameElement::Wall)
         {
             gameGrid_[player_.getY()][player_.getX()] = GameElement::Empty;
-            if(gameGrid_[player_.getY()][player_.getX()+1] == GameElement::Coin)
+            if (gameGrid_[player_.getY()][player_.getX() + 1] == GameElement::Coin)
             {
                 counsCount_--;
             }
-            gameGrid_[player_.getY()][player_.getX()+1] = GameElement::Puckman;
+            gameGrid_[player_.getY()][player_.getX() + 1] = GameElement::Puckman;
             player_.setX(player_.getX() + 1);
             qDebug() << "Player Coordinates: (" << player_.getY() << ", " << player_.getX() << ")";
         }

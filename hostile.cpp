@@ -2,8 +2,6 @@
 
 using namespace std;
 
-
-
 Hostile::Hostile(std::vector<std::vector<int>>& inputMatrix) : position_(0, 0)
 {}
 
@@ -17,53 +15,54 @@ bool Hostile::isCellValidForMovement(int x, int y)
     return x >= GameElement::Empty && x < columns && y >= GameElement::Empty && y < rows && matrix_[y][x] != GameElement::Wall && matrix_[y][x] != GameElement::Hostile;
 }
 
-std::vector<std::string> getMoveDirections(const Point& start, const Point& end)
+std::vector<Directions> getMoveDirections(const Point& start, const Point& end)
 {
     int dx = end.x - start.x;
     int dy = end.y - start.y;
 
-    std::vector<std::string> directions;
+    std::vector<Directions> directions;
 
     if (dx > 0)
     {
-        directions.push_back("Right");
+        directions.push_back(Directions(Directions::Right));
     } else if (dx < 0)
     {
-        directions.push_back("Left");
+        directions.push_back(Directions(Directions::Left));
     }
 
     if (dy > 0)
     {
-        directions.push_back("Down");
-    } else if (dy < 0)
+        directions.push_back(Directions(Directions::Down));
+    }
+    else if (dy < 0)
     {
-        directions.push_back("Up");
+        directions.push_back(Directions(Directions::Up));
     }
 
     return directions;
 }
 
-std::vector<std::string> Hostile::getPath(const Point& end)
+std::vector<Directions> Hostile::getPath(const Point& end)
 {
     int rows = matrix_.size();
     int columns = matrix_[0].size();
 
-    std::vector<std::string> directions;
+    std::vector<Directions> directions;
 
     vector<vector<int>> distance(rows, vector<int>(columns, INT_MAX));
     vector<vector<Point>> path(rows, vector<Point>(columns, Point(-1, -1)));
-    priority_queue<Node, vector<Node>, greater<Node>> pq;
+    priority_queue<Node, vector<Node>, greater<Node>> priorityQueue;
 
-    pq.push(Node(position_, 0));
+    priorityQueue.push(Node(position_, 0));
     distance[position_.y][position_.x] = 0;
 
     int dx[] = {-1, 1, 0, 0};
     int dy[] = {0, 0, -1, 1};
 
-    while (!pq.empty())
+    while (!priorityQueue.empty())
     {
-        Node current = pq.top();
-        pq.pop();
+        Node current = priorityQueue.top();
+        priorityQueue.pop();
 
         if (current.point.x == end.x && current.point.y == end.y)
         {
@@ -86,16 +85,19 @@ std::vector<std::string> Hostile::getPath(const Point& end)
 
                 if (dx == -1)
                 {
-                    directions.push_back("Left");
-                } else if (dx == 1)
+                    directions.push_back(Directions(Directions::Left));
+                }
+                else if (dx == 1)
                 {
-                    directions.push_back("Right");
-                } else if (dy == -1)
+                    directions.push_back(Directions(Directions::Right));
+                }
+                else if (dy == -1)
                 {
-                    directions.push_back("Up");
-                } else if (dy == 1)
+                    directions.push_back(Directions(Directions::Up));
+                }
+                else if (dy == 1)
                 {
-                    directions.push_back("Down");
+                    directions.push_back(Directions(Directions::Down));
                 }
 
                 currentPoint = point;
@@ -105,29 +107,29 @@ std::vector<std::string> Hostile::getPath(const Point& end)
             return directions;
         }
 
-        int step_weight = 1;
-        static const int numDirections = 4;
+        int stepWeight = 1;
+        const int kDirections = 4;
 
-        for (int i = 0; i < numDirections; ++i)
+        for (int i = 0; i < kDirections; ++i)
         {
             int nextX = current.point.x + dx[i];
             int nextY = current.point.y + dy[i];
 
             if (isCellValidForMovement(nextX, nextY))
             {
-                int newDistance = current.distance + step_weight;
+                int newDistance = current.distance + stepWeight;
 
                 if (newDistance < distance[nextY][nextX])
                 {
                     distance[nextY][nextX] = newDistance;
                     path[nextY][nextX] = current.point;
-                    pq.push(Node(Point(nextX, nextY), newDistance));
+                    priorityQueue.push(Node(Point(nextX, nextY), newDistance));
                 }
             }
         }
     }
 
-    return vector<std::string>();
+    return std::vector<Directions>();
 }
 
 void Hostile::setPosition(Point& pos)
@@ -163,14 +165,16 @@ int Hostile::Primer()
     Point end(0, 3);
 
     hostile.setPosition(start);
-    vector<std::string> pathDirections = hostile.getPath(end);
+    std::vector<Directions> pathDirections = hostile.getPath(end);
 
         if (pathDirections.empty())
         {
             cout << "No path found." << endl;
-        } else {
+        }
+        else
+        {
             cout << "Shortest Path Directions: ";
-            for (string direction : pathDirections)
+            for (Directions direction : pathDirections)
             {
                 cout << direction << " ";
             }

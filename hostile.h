@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <string>
 
+#include "directions.h"
 #include "gameelement.h"
 
 struct Point
@@ -19,6 +20,18 @@ struct Point
 
 class Hostile
 {
+public:
+    Hostile();
+    Hostile(std::vector<std::vector<int>>& inputMatrix);
+
+    std::vector<Directions> getPath(const Point& end);
+    int getPreviousElement();
+    int Primer();
+    void setPreviousElement(int element);
+    void setPosition(Point& pos);
+    void setMatrix(std::vector<std::vector<int>>& inputMatrix);
+    Point getPosition();
+
 private:
     struct Node
     {
@@ -39,17 +52,6 @@ private:
     Point position_;
     int previousElement_  = 0;
 
-public:
-    Hostile();
-    Hostile(std::vector<std::vector<int>>& inputMatrix);
-
-    std::vector<std::string> getPath(const Point& end);
-    int getPreviousElement();
-        int Primer();
-    void setPreviousElement(int element);
-    void setPosition(Point& pos);
-    void setMatrix(std::vector<std::vector<int>>& inputMatrix);
-    Point getPosition();
 };
 
 #endif // HOSTILE_H

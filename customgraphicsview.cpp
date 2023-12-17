@@ -38,7 +38,9 @@ void CustomGraphicsView::setCursorStyle()
     if (isDrawing_)
     {
         setCursor(Qt::CrossCursor);
-    } else {
+    }
+    else
+    {
         setCursor(Qt::ArrowCursor);
     }
 }
@@ -68,7 +70,7 @@ void CustomGraphicsView::setCenter(QPointF newCenter)
     center_ = newCenter;
 }
 
-void CustomGraphicsView::setDrawing(bool newDrawing)
+void CustomGraphicsView::setDrawing(bool isDrawing)
 {
-    isDrawing_ = newDrawing;
+    isDrawing_ = isDrawing;
 }
