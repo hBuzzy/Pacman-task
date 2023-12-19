@@ -25,7 +25,8 @@ std::vector<Directions> getMoveDirections(const Point& start, const Point& end)
     if (dx > 0)
     {
         directions.push_back(Directions(Directions::Right));
-    } else if (dx < 0)
+    }
+    else if (dx < 0)
     {
         directions.push_back(Directions(Directions::Left));
     }

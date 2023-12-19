@@ -20,7 +20,6 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
     MainWindow(QWidget *parent = nullptr, int** gameGrid = nullptr);
     ~MainWindow();
 
@@ -46,10 +45,7 @@ private:
     QGraphicsView *view_;
     std::vector<Hostile> hostiles_;
 
-    void movePlayerUp();
-    void movePlayerDown();
-    void movePlayerLeft();
-    void movePlayerRight();
+    void movePlayer(Directions direction);
     void moveHostile();
     void generateRandomElements(int element, int count);
     void updateCoinsCount();

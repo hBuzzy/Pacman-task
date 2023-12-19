@@ -26,8 +26,10 @@ Redactor::Redactor(QWidget *parent) :
 
     connect(view, &CustomGraphicsView::customMouseRelease, this, &Redactor::handleCustomMouseRelease);
 
-    int uiWidth = (kColumns_ + 6) * cellSize_;
-    int uiHeight = (kRows_ + 1) * cellSize_;
+    int indentationColumns = 6;
+    int indentationRows = 1;
+    int uiWidth = (kColumns_ + indentationColumns) * cellSize_;
+    int uiHeight = (kRows_ + indentationRows) * cellSize_;
 
     this->setFixedSize(uiWidth, uiHeight);
     setCentralWidget(view);
@@ -70,8 +72,8 @@ void Redactor::handleButtonClick()
 {
     if (counsCount_ <= 0)
     {
-        std::string str1 = "couns count < 0";
-        const char* charArray = str1.c_str();
+        std::string stringWarn = "couns count < 0";
+        const char* charArray = stringWarn.c_str();
         QMessageBox::information(this, "False", charArray);
         return;
     }
@@ -160,26 +162,30 @@ void Redactor::setupGameGrid()
             }
         }
         int extraColumns = kColumns_+2;
-        int nextRow = 1 * cellSize_;
+        int Row = 2;
+        int nextRow = Row * cellSize_;
         wallItem_ = scene->addPixmap(QPixmap(":resource/wall.png").scaled(cellSize_, cellSize_));
         wallItem_->setX((extraColumns) * cellSize_);
         wallItem_->setY(nextRow);
         qDebug() << "wallItem Coordinates: (" << wallItem_->x() << ", " << wallItem_->y() << ")";
-        nextRow = 4 * cellSize_;
+        Row = 4;
+        nextRow = Row * cellSize_;
 
         puckmanItem_ = scene->addPixmap(QPixmap(":resource/puckman.png").scaled(cellSize_, cellSize_));
         puckmanItem_->setX((extraColumns) * cellSize_);
         puckmanItem_->setY(nextRow);
         qDebug() << "puckmanItem Coordinates: (" << puckmanItem_->x() << ", " << puckmanItem_->y() << ")";
-        extraColumns = 2;
-        nextRow = 6 * cellSize_;
+
+        Row = 6;
+        nextRow = Row * cellSize_;
 
         hostileItem_ = scene->addPixmap(QPixmap(":resource/hostile.png").scaled(cellSize_, cellSize_));
         hostileItem_->setX((extraColumns) * cellSize_);
         hostileItem_->setY(nextRow);
         qDebug() << "hostileItem Coordinates: (" << hostileItem_->x() << ", " << hostileItem_->y() << ")";
-        extraColumns = 2;
-        nextRow = 8 * cellSize_;
+
+        Row = 8;
+        nextRow = Row * cellSize_;
 
         coinItem_ = scene->addPixmap(QPixmap(":resource/coin.png").scaled(cellSize_, cellSize_));
         coinItem_->setX((extraColumns) * cellSize_);
@@ -199,9 +205,9 @@ QPoint Redactor::getGridPoint()
     {
         for (int j = 0; j < kColumns_; ++j)
         {
-            if (view->getCenterX()> i * cellSize_-halfGridSize && view->getCenterX()< i * cellSize_+halfGridSize)
+            if (view->getCenterX() > i * cellSize_ - halfGridSize && view->getCenterX()< i * cellSize_ + halfGridSize)
             {
-                if (view->getCenterY() > j * cellSize_-halfGridSize && view->getCenterY() < j * cellSize_+halfGridSize)
+                if (view->getCenterY() > j * cellSize_ - halfGridSize && view->getCenterY() < j * cellSize_ + halfGridSize)
                 {
                     coordinateElementGrid.setX(i);
                     coordinateElementGrid.setY(j);
